@@ -2,15 +2,19 @@ import { useEffect, useState } from 'react'
 import './App.css'
 
 function App() {
-  const [backendStatus, setBackendStatus] = useState('连接中...')
+  const [backendStatus, setBackendStatus] = useState('Disconnected')
 
   useEffect(() => {
     fetch('http://localhost:3000/api/health')
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === 'ok') {
-          setBackendStatus('Connected')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Health check failed')
         }
+
+        return response.json()
+      })
+      .then((data) => {
+        setBackendStatus(data.status === 'ok' ? 'Connected' : 'Disconnected')
       })
       .catch(() => {
         setBackendStatus('Disconnected')
@@ -18,13 +22,11 @@ function App() {
   }, [])
 
   return (
-    <div>
+    <main>
       <h1>MindCraft AI</h1>
-
-      <p>
-        Backend Status：{backendStatus}
-      </p>
-    </div>
+      <p>Backend Status</p>
+      <p>{backendStatus}</p>
+    </main>
   )
 }
 
