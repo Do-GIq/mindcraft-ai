@@ -1,17 +1,17 @@
 :root {
-  font-family: system-ui, sans-serif;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  color: #0b1220;
+  background: #fbfcfe;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+html,
+body,
 #root {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-}
-
-body {
+  min-width: 320px;
+  min-height: 100%;
   margin: 0;
 }
