@@ -5,13 +5,6 @@ export const stats = [
   { title: '平均响应时间', value: '1.8s', trend: '-10%', trendLabel: '较上月', icon: 'clock' },
 ] as const
 
-export const recentProjects = [
-  { name: '杭州周末旅行攻略', category: '旅游攻略', updatedAt: '今天 10:30', progress: 75, color: 'blue' },
-  { name: '毕业季短视频脚本', category: '脚本创作', updatedAt: '昨天 16:45', progress: 60, color: 'green' },
-  { name: '小红书护肤文案', category: '社媒文案', updatedAt: '昨天 11:20', progress: 90, color: 'purple' },
-  { name: '品牌营销方案', category: '营销方案', updatedAt: '5月20日 14:10', progress: 40, color: 'orange' },
-] as const
-
 export const usageTrend = {
   dates: ['5/16', '5/17', '5/18', '5/19', '5/20', '5/21', '5/22'],
   generations: [42, 61, 55, 66, 72, 60, 76],

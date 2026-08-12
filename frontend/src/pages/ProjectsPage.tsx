@@ -1,33 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { FolderOpen, Plus, X } from 'lucide-react'
-import type { CreateProjectInput, Project } from '../types/project'
-
-const projectsQueryKey = ['projects'] as const
-
-async function fetchProjects(): Promise<Project[]> {
-  const response = await fetch('/api/projects')
-
-  if (!response.ok) {
-    throw new Error('项目加载失败')
-  }
-
-  return response.json() as Promise<Project[]>
-}
-
-async function createProject(input: CreateProjectInput): Promise<Project> {
-  const response = await fetch('/api/projects', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(input),
-  })
-
-  if (!response.ok) {
-    throw new Error('项目创建失败')
-  }
-
-  return response.json() as Promise<Project>
-}
+import { FolderOpen, Plus, Trash2, X } from 'lucide-react'
+import { createProject, deleteProject, fetchProjects, projectsQueryKey } from '../api/projectApi'
+import type { Project } from '../types/project'
 
 function ProjectsPage() {
   const queryClient = useQueryClient()
@@ -36,6 +11,7 @@ function ProjectsPage() {
   const [type, setType] = useState('')
   const [description, setDescription] = useState('')
   const [validationError, setValidationError] = useState('')
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
   const { data: projects, isPending, isError } = useQuery({
     queryKey: projectsQueryKey,
     queryFn: fetchProjects,
@@ -49,6 +25,13 @@ function ProjectsPage() {
       setDescription('')
       setValidationError('')
       setIsCreateOpen(false)
+    },
+  })
+  const deleteMutation = useMutation({
+    mutationFn: deleteProject,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+      setProjectToDelete(null)
     },
   })
 
@@ -110,6 +93,9 @@ function ProjectsPage() {
                 <div className="project-card-heading">
                   <h2>{project.title}</h2>
                   <span className="project-type">{project.type}</span>
+                  <button className="delete-project-button" type="button" onClick={() => { deleteMutation.reset(); setProjectToDelete(project) }} disabled={deleteMutation.isPending && projectToDelete?.id === project.id} aria-label={`删除项目 ${project.title}`}>
+                    <Trash2 size={17} />删除
+                  </button>
                 </div>
                 <p>{project.description || '暂无项目描述'}</p>
                 <div className="project-card-footer">
@@ -159,6 +145,23 @@ function ProjectsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {projectToDelete && (
+        <div className="modal-backdrop" role="presentation">
+          <div className="confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-project-title" aria-describedby="delete-project-description">
+            <div className="confirm-icon"><Trash2 size={22} /></div>
+            <h2 id="delete-project-title">确认删除项目？</h2>
+            <p id="delete-project-description">项目“{projectToDelete.title}”将被永久删除，此操作无法撤销。</p>
+            {deleteMutation.isError && <p className="form-error">项目删除失败，请稍后重试。</p>}
+            <div className="modal-actions">
+              <button className="secondary-button" type="button" onClick={() => { setProjectToDelete(null); deleteMutation.reset() }} disabled={deleteMutation.isPending}>取消</button>
+              <button className="danger-button" type="button" onClick={() => deleteMutation.mutate(projectToDelete.id)} disabled={deleteMutation.isPending}>
+                {deleteMutation.isPending ? '删除中...' : '确认删除'}
+              </button>
+            </div>
           </div>
         </div>
       )}

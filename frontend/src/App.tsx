@@ -11,6 +11,7 @@ import {
   Settings,
   Sparkles,
 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import defaultAvatar from './assets/avatar/default-avatar.png'
 import mindcraftLogo from './assets/brand/mindcraft-logo.png'
@@ -20,6 +21,7 @@ import ModelUsageChart from './components/dashboard/ModelUsageChart'
 import QuickCreate from './components/dashboard/QuickCreate'
 import StatCard from './components/dashboard/StatCard'
 import UsageTrendChart from './components/dashboard/UsageTrendChart'
+import { fetchProjects, projectsQueryKey } from './api/projectApi'
 import { stats } from './data/dashboard'
 import ProjectsPage from './pages/ProjectsPage'
 import './App.css'
@@ -88,16 +90,21 @@ function DashboardHeader() {
 }
 
 function DashboardPage() {
+  const projectsQuery = useQuery({ queryKey: projectsQueryKey, queryFn: fetchProjects })
+
   return (
     <>
       <DashboardHeader />
       <section className="stats-grid">
         {stats.map((stat, index) => {
           const Icon = statIcons[stat.icon]
-          return <StatCard key={stat.title} {...stat} tone={statTones[index]} icon={<Icon size={25} />} />
+          const value = index === 0
+            ? projectsQuery.isPending ? '...' : projectsQuery.isError ? '--' : String(projectsQuery.data.length)
+            : stat.value
+          return <StatCard key={stat.title} {...stat} value={value} tone={statTones[index]} icon={<Icon size={25} />} />
         })}
       </section>
-      <div className="middle-grid"><RecentProjects /><UsageTrendChart /></div>
+      <div className="middle-grid"><RecentProjects projects={projectsQuery.data} isPending={projectsQuery.isPending} isError={projectsQuery.isError} /><UsageTrendChart /></div>
       <div className="bottom-grid"><QuickCreate /><ModelUsageChart /><RecentActivity /></div>
     </>
   )
