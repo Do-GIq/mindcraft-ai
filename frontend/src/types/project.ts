@@ -7,3 +7,9 @@ export type Project = {
   createdAt: string
   updatedAt: string
 }
+
+export type CreateProjectInput = {
+  title: string
+  type?: string
+  description?: string
+}
