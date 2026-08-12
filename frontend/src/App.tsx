@@ -11,6 +11,7 @@ import {
   Settings,
   Sparkles,
 } from 'lucide-react'
+import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
 import defaultAvatar from './assets/avatar/default-avatar.png'
 import mindcraftLogo from './assets/brand/mindcraft-logo.png'
 import RecentActivity from './components/dashboard/RecentActivity'
@@ -20,11 +21,12 @@ import QuickCreate from './components/dashboard/QuickCreate'
 import StatCard from './components/dashboard/StatCard'
 import UsageTrendChart from './components/dashboard/UsageTrendChart'
 import { stats } from './data/dashboard'
+import ProjectsPage from './pages/ProjectsPage'
 import './App.css'
 
 const navigationItems = [
-  { label: '概览', icon: Home },
-  { label: '我的项目', icon: Folder },
+  { label: '概览', icon: Home, to: '/' },
+  { label: '我的项目', icon: Folder, to: '/projects' },
   { label: 'AI 创作', icon: Sparkles },
   { label: '文档', icon: FileText },
   { label: '历史版本', icon: Clock3 },
@@ -43,11 +45,15 @@ function Sidebar() {
       </div>
       <nav aria-label="主导航">
         <ul className="navigation-list">
-          {navigationItems.map(({ label, icon: Icon }) => (
+          {navigationItems.map(({ label, icon: Icon, to }) => (
             <li key={label}>
-              <span className={`navigation-item${label === '概览' ? ' is-active' : ''}`} aria-current={label === '概览' ? 'page' : undefined}>
-                <Icon size={21} />{label}
-              </span>
+              {to ? (
+                <NavLink className={({ isActive }) => `navigation-item${isActive ? ' is-active' : ''}`} to={to} end={to === '/'}>
+                  <Icon size={21} />{label}
+                </NavLink>
+              ) : (
+                <span className="navigation-item"><Icon size={21} />{label}</span>
+              )}
             </li>
           ))}
         </ul>
@@ -81,22 +87,42 @@ function DashboardHeader() {
   )
 }
 
-function App() {
+function DashboardPage() {
+  return (
+    <>
+      <DashboardHeader />
+      <section className="stats-grid">
+        {stats.map((stat, index) => {
+          const Icon = statIcons[stat.icon]
+          return <StatCard key={stat.title} {...stat} tone={statTones[index]} icon={<Icon size={25} />} />
+        })}
+      </section>
+      <div className="middle-grid"><RecentProjects /><UsageTrendChart /></div>
+      <div className="bottom-grid"><QuickCreate /><ModelUsageChart /><RecentActivity /></div>
+    </>
+  )
+}
+
+function DashboardLayout() {
   return (
     <div className="dashboard-layout">
       <Sidebar />
       <main className="main-content">
-        <DashboardHeader />
-        <section className="stats-grid">
-          {stats.map((stat, index) => {
-            const Icon = statIcons[stat.icon]
-            return <StatCard key={stat.title} {...stat} tone={statTones[index]} icon={<Icon size={25} />} />
-          })}
-        </section>
-        <div className="middle-grid"><RecentProjects /><UsageTrendChart /></div>
-        <div className="bottom-grid"><QuickCreate /><ModelUsageChart /><RecentActivity /></div>
+        <Outlet />
       </main>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route element={<DashboardLayout />}>
+        <Route index element={<DashboardPage />} />
+        <Route path="projects" element={<ProjectsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Route>
+    </Routes>
   )
 }
 
