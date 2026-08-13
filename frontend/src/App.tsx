@@ -1,18 +1,18 @@
 import {
   BarChart3,
-  ChevronDown,
   Clock3,
   FileText,
   Folder,
   Home,
   Layers3,
+  LogOut,
   Plus,
   Search,
   Settings,
   Sparkles,
 } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router'
 import defaultAvatar from './assets/avatar/default-avatar.png'
 import mindcraftLogo from './assets/brand/mindcraft-logo.png'
 import RecentActivity from './components/dashboard/RecentActivity'
@@ -24,6 +24,9 @@ import UsageTrendChart from './components/dashboard/UsageTrendChart'
 import { fetchProjects, projectsQueryKey } from './api/projectApi'
 import { stats } from './data/dashboard'
 import ProjectsPage from './pages/ProjectsPage'
+import AuthPage from './pages/AuthPage'
+import { AuthRoute } from './components/auth/AuthRoute'
+import { useAuthStore } from './stores/authStore'
 import './App.css'
 
 const navigationItems = [
@@ -40,6 +43,18 @@ const statIcons = { layers: Layers3, sparkles: Sparkles, file: FileText, clock: 
 const statTones = ['blue', 'green', 'purple', 'orange']
 
 function Sidebar() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const user = useAuthStore((state) => state.user)
+  const clearAuth = useAuthStore((state) => state.clearAuth)
+  const displayName = user?.name || user?.email.split('@')[0] || '用户'
+
+  function logout() {
+    clearAuth()
+    queryClient.clear()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -64,8 +79,8 @@ function Sidebar() {
         <span className="avatar-frame">
           <img className="avatar-image" src={defaultAvatar} alt="默认用户头像" />
         </span>
-        <span className="user-name">uwhhw</span>
-        <ChevronDown size={16} />
+        <span className="user-name" title={user?.email}>{displayName}</span>
+        <button className="logout-button" type="button" onClick={logout} aria-label="退出登录" title="退出登录"><LogOut size={17} /></button>
       </div>
     </aside>
   )
@@ -124,11 +139,13 @@ function DashboardLayout() {
 function App() {
   return (
     <Routes>
-      <Route element={<DashboardLayout />}>
+      <Route path="login" element={<AuthRoute><AuthPage mode="login" /></AuthRoute>} />
+      <Route path="register" element={<AuthRoute><AuthPage mode="register" /></AuthRoute>} />
+      <Route element={<AuthRoute requireAuth><DashboardLayout /></AuthRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="projects" element={<ProjectsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

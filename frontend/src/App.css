@@ -21,10 +21,12 @@ button, input, textarea { font: inherit; }
 .navigation-list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .navigation-item { display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 17px; border-radius: 10px; color: #263142; font-size: 15px; font-weight: 600; text-decoration: none; }
 .navigation-item.is-active { color: #1658c7; background: #eef4ff; }
-.sidebar-user { min-height: 66px; display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 11px; margin-top: auto; padding: 13px 8px 0; color: #111827; border-top: 1px solid var(--border); }
+.sidebar-user { min-height: 66px; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 11px; margin-top: auto; padding: 13px 8px 0; color: #111827; border-top: 1px solid var(--border); }
 .avatar-frame { position: relative; width: 44px; height: 44px; overflow: hidden; border-radius: 50%; background: #edf3ff; }
 .avatar-image { position: absolute; top: -9px; left: -27px; width: 100px; height: auto; }
-.user-name { font-size: 14px; font-weight: 650; }
+.user-name { overflow: hidden; font-size: 14px; font-weight: 650; white-space: nowrap; text-overflow: ellipsis; }
+.logout-button { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; color: #667085; background: transparent; border: 0; border-radius: 7px; cursor: pointer; }
+.logout-button:hover { color: #b54747; background: #fff1f1; }
 
 .main-content { min-width: 0; flex: 1; padding: 20px 32px 22px; }
 .dashboard-header { display: flex; align-items: center; justify-content: space-between; gap: 28px; margin-bottom: 16px; }

@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import authRouter from './modules/auth/auth.route.js'
 import projectRouter from './modules/project/project.route.js'
 
 const app = express()
@@ -14,6 +15,7 @@ app.get('/api/health', (req, res) => {
 })
 
 app.use('/api/projects', projectRouter)
+app.use('/api/auth', authRouter)
 
 app.listen(3000, () => {
   console.log('Server running at http://localhost:3000')
