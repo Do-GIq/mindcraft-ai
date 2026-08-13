@@ -15,6 +15,10 @@ export function getProjects(userId: number) {
   })
 }
 
+export function getProject(userId: number, id: number) {
+  return prisma.project.findFirst({ where: { id, userId } })
+}
+
 export function createProject(userId: number, data: CreateProjectInput) {
   return prisma.project.create({ data: { ...data, userId } })
 }

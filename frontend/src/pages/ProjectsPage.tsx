@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { FolderOpen, Plus, Trash2, X } from 'lucide-react'
+import { ArrowRight, FolderOpen, Plus, Trash2, X } from 'lucide-react'
+import { Link } from 'react-router'
 import { createProject, deleteProject, fetchProjects, projectsQueryKey } from '../api/projectApi'
 import type { Project } from '../types/project'
 import { useAuthStore } from '../stores/authStore'
@@ -95,8 +96,9 @@ function ProjectsPage() {
               <div className="project-card-icon"><FolderOpen size={22} /></div>
               <div className="project-card-content">
                 <div className="project-card-heading">
-                  <h2>{project.title}</h2>
+                  <h2><Link className="project-title-link" to={`/projects/${project.id}`}>{project.title}</Link></h2>
                   <span className="project-type">{project.type}</span>
+                  <Link className="project-detail-link" to={`/projects/${project.id}`}>查看项目<ArrowRight size={15} /></Link>
                   <button className="delete-project-button" type="button" onClick={() => { deleteMutation.reset(); setProjectToDelete(project) }} disabled={deleteMutation.isPending && projectToDelete?.id === project.id} aria-label={`删除项目 ${project.title}`}>
                     <Trash2 size={17} />删除
                   </button>

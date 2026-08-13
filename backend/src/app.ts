@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import authRouter from './modules/auth/auth.route.js'
 import projectRouter from './modules/project/project.route.js'
+import documentRouter from './modules/document/document.route.js'
 
 const app = express()
 
@@ -14,6 +15,7 @@ app.get('/api/health', (req, res) => {
   })
 })
 
+app.use('/api/projects/:projectId/documents', documentRouter)
 app.use('/api/projects', projectRouter)
 app.use('/api/auth', authRouter)
 

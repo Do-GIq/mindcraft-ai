@@ -24,6 +24,7 @@ import UsageTrendChart from './components/dashboard/UsageTrendChart'
 import { fetchProjects, projectsQueryKey } from './api/projectApi'
 import { stats } from './data/dashboard'
 import ProjectsPage from './pages/ProjectsPage'
+import ProjectDetailPage from './pages/ProjectDetailPage'
 import AuthPage from './pages/AuthPage'
 import { AuthRoute } from './components/auth/AuthRoute'
 import { useAuthStore } from './stores/authStore'
@@ -149,6 +150,7 @@ function App() {
       <Route element={<AuthRoute requireAuth><DashboardLayout /></AuthRoute>}>
         <Route index element={<DashboardPage />} />
         <Route path="projects" element={<ProjectsPage />} />
+        <Route path="projects/:projectId" element={<ProjectDetailPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
