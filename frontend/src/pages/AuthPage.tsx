@@ -74,8 +74,8 @@ function AuthPage({ mode }: AuthPageProps) {
           <span className="auth-eyebrow"><Sparkles size={16} /> AI 内容工作空间</span>
           {isRegister ? (
             <>
-              <h1>从一个账号，开启完整创作流程。</h1>
-              <p className="auth-brand-description">创建您的 MindCraft AI 工作空间，让内容、项目与创作进度始终清晰有序。</p>
+              <h1>从一个账号，开启完整创作流程</h1>
+              <p className="auth-brand-description">创建您的 MindCraft AI 工作空间，让内容、项目与创作进度始终清晰有序</p>
               <div className="register-workflow" aria-label="创建账号后进入 AI 创作工作空间">
                 <div className="workflow-track" aria-hidden="true"><span /></div>
                 <div className="workflow-step">
@@ -91,7 +91,7 @@ function AuthPage({ mode }: AuthPageProps) {
                   <strong>统一管理</strong><small>沉淀项目成果</small>
                 </div>
               </div>
-              <p className="register-workflow-caption"><Sparkles size={15} /> 您的创作进度，将从这里持续生长。</p>
+              <p className="register-workflow-caption"><Sparkles size={15} /> 您的创作进度，将从这里持续生长</p>
             </>
           ) : (
             <>
@@ -106,8 +106,8 @@ function AuthPage({ mode }: AuthPageProps) {
                 <div className="constellation-node node-content"><FileText size={18} /><span>沉淀内容</span></div>
                 <div className="constellation-node node-structure"><Shapes size={18} /><span>组织结构</span></div>
               </div>
-              <p className="auth-brand-description login-description">在统一工作空间中整理灵感、管理项目，让每一步创作都更从容。</p>
-              <h1 className="login-title">专注创作，灵感自然成形。</h1>
+              <p className="auth-brand-description login-description">在统一工作空间中整理灵感、管理项目，让每一步创作都更从容</p>
+              <h1 className="login-title">专注创作，灵感自然成形</h1>
             </>
           )}
         </div>

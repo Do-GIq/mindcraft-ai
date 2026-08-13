@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Navigate, NavLink, Outlet, Route, Routes, useNavigate } from 'react-router'
 import defaultAvatar from './assets/avatar/default-avatar.png'
 import mindcraftLogo from './assets/brand/mindcraft-logo.png'
@@ -28,6 +29,7 @@ import ProjectDetailPage from './pages/ProjectDetailPage'
 import DocumentEditorPage from './pages/DocumentEditorPage'
 import AuthPage from './pages/AuthPage'
 import { AuthRoute } from './components/auth/AuthRoute'
+import CreateProjectModal from './components/project/CreateProjectModal'
 import { useAuthStore } from './stores/authStore'
 import './App.css'
 
@@ -88,7 +90,7 @@ function Sidebar() {
   )
 }
 
-function DashboardHeader() {
+function DashboardHeader({ onCreateProject }: { onCreateProject: () => void }) {
   return (
     <header className="dashboard-header">
       <div>
@@ -100,13 +102,14 @@ function DashboardHeader() {
           <Search size={20} />
           <input type="search" placeholder="搜索项目、文档或内容..." aria-label="搜索" />
         </label>
-        <button className="primary-button" type="button"><Plus size={20} />新建项目</button>
+        <button className="primary-button" type="button" onClick={onCreateProject}><Plus size={20} />新建项目</button>
       </div>
     </header>
   )
 }
 
 function DashboardPage() {
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
   const userId = useAuthStore((state) => state.user?.id)
   const projectsQuery = useQuery({
     queryKey: projectsQueryKey(userId),
@@ -116,7 +119,7 @@ function DashboardPage() {
 
   return (
     <>
-      <DashboardHeader />
+      <DashboardHeader onCreateProject={() => setIsCreateOpen(true)} />
       <section className="stats-grid">
         {stats.map((stat, index) => {
           const Icon = statIcons[stat.icon]
@@ -128,6 +131,7 @@ function DashboardPage() {
       </section>
       <div className="middle-grid"><RecentProjects projects={projectsQuery.data} isPending={projectsQuery.isPending} isError={projectsQuery.isError} /><UsageTrendChart /></div>
       <div className="bottom-grid"><QuickCreate /><ModelUsageChart /><RecentActivity /></div>
+      <CreateProjectModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} />
     </>
   )
 }

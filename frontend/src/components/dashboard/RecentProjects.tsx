@@ -1,4 +1,5 @@
 import { ChevronRight, FileText } from 'lucide-react'
+import { Link } from 'react-router'
 import type { Project } from '../../types/project'
 
 type RecentProjectsProps = {
@@ -14,7 +15,7 @@ function RecentProjects({ projects, isPending, isError }: RecentProjectsProps) {
     <section className="dashboard-card recent-projects">
       <div className="card-heading">
         <h2>最近项目</h2>
-        <button className="text-button" type="button">查看全部 <ChevronRight size={16} /></button>
+        <Link className="text-button" to="/projects">查看全部 <ChevronRight size={16} /></Link>
       </div>
       <div className="project-table">
         <div className="project-row project-table-head">
