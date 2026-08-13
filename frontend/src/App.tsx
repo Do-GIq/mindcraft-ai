@@ -25,6 +25,7 @@ import { fetchProjects, projectsQueryKey } from './api/projectApi'
 import { stats } from './data/dashboard'
 import ProjectsPage from './pages/ProjectsPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
+import DocumentEditorPage from './pages/DocumentEditorPage'
 import AuthPage from './pages/AuthPage'
 import { AuthRoute } from './components/auth/AuthRoute'
 import { useAuthStore } from './stores/authStore'
@@ -151,6 +152,7 @@ function App() {
         <Route index element={<DashboardPage />} />
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="projects/:projectId" element={<ProjectDetailPage />} />
+        <Route path="projects/:projectId/documents/:documentId" element={<DocumentEditorPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

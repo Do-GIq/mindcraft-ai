@@ -90,13 +90,13 @@ function ProjectDetailPage() {
         {documentsQuery.data && documentsQuery.data.length > 0 && (
           <div className="documents-list">
             {documentsQuery.data.map((document) => (
-              <article className="document-card" key={document.id}>
+              <Link className="document-card" key={document.id} to={`/projects/${projectId}/documents/${document.id}`}>
                 <span className="document-icon"><FileText size={20} /></span>
                 <div>
                   <h3>{document.title}</h3>
                   <time dateTime={document.updatedAt}>更新于 {new Date(document.updatedAt).toLocaleString('zh-CN')}</time>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         )}

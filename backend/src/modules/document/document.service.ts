@@ -19,3 +19,18 @@ export function createDocument(projectId: number, title: string) {
     data: { projectId, title, content: '' },
   })
 }
+
+export function getOwnedDocument(userId: number, id: number) {
+  return prisma.document.findFirst({
+    where: { id, project: { userId } },
+  })
+}
+
+type UpdateDocumentInput = {
+  title?: string
+  content?: string
+}
+
+export function updateDocument(id: number, data: UpdateDocumentInput) {
+  return prisma.document.update({ where: { id }, data })
+}

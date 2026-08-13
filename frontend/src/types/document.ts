@@ -10,3 +10,8 @@ export type Document = {
 export type CreateDocumentInput = {
   title?: string
 }
+
+export type UpdateDocumentInput = {
+  title?: string
+  content?: string
+}

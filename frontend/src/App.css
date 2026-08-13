@@ -156,10 +156,40 @@ button, input, textarea { font: inherit; }
 .documents-empty h3 { margin: 0 0 7px; color: var(--heading); font-size: 17px; }
 .documents-empty p { margin: 0; color: var(--muted); font-size: 13px; }
 .documents-list { display: grid; gap: 10px; padding-top: 16px; }
-.document-card { display: flex; align-items: center; gap: 13px; padding: 15px 16px; border: 1px solid var(--border); border-radius: 10px; }
+.document-card { display: flex; align-items: center; gap: 13px; padding: 15px 16px; color: inherit; border: 1px solid var(--border); border-radius: 10px; text-decoration: none; }
+.document-card:hover { border-color: #bfd0ea; background: #fbfdff; }
 .document-icon { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; color: var(--blue); background: #edf3ff; border-radius: 9px; }
 .document-card h3 { margin: 0 0 5px; color: var(--heading); font-size: 15px; }
 .document-card time { color: var(--muted); font-size: 12px; }
+
+.document-editor-page { width: min(1100px, 100%); margin: 0 auto; }
+.editor-header { margin-bottom: 16px; }
+.editor-header .back-link { margin-bottom: 14px; }
+.editor-title-row { display: flex; align-items: center; gap: 20px; }
+.document-title-input { min-width: 0; flex: 1; padding: 5px 2px; color: var(--heading); background: transparent; border: 0; border-bottom: 1px solid transparent; outline: 0; font-size: 27px; font-weight: 700; }
+.document-title-input:focus { border-bottom-color: #a9c0e5; }
+.save-area { display: flex; align-items: center; gap: 12px; }
+.save-status { font-size: 13px; }
+.save-status.is-saved { color: #168764; }
+.save-status.is-error { color: #b42318; }
+.editor-shell { overflow: hidden; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; }
+.editor-toolbar { min-height: 52px; display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 8px 12px; background: #fbfcfe; border-bottom: 1px solid var(--border); }
+.editor-toolbar button { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; color: #4b5870; background: transparent; border: 1px solid transparent; border-radius: 7px; cursor: pointer; }
+.editor-toolbar button:hover:not(:disabled) { color: var(--blue); background: #edf3ff; }
+.editor-toolbar button.is-active { color: var(--blue); background: #e7efff; border-color: #cad9f4; }
+.editor-toolbar button:disabled { cursor: not-allowed; opacity: .35; }
+.toolbar-divider { width: 1px; height: 22px; margin: 0 3px; background: var(--border); }
+.tiptap-editor { min-height: 480px; }
+.tiptap-editor .tiptap { min-height: 480px; padding: 34px 42px; color: var(--body); outline: 0; font-size: 16px; line-height: 1.75; }
+.tiptap-editor .tiptap > :first-child { margin-top: 0; }
+.tiptap-editor .tiptap h1 { color: var(--heading); font-size: 30px; line-height: 1.3; }
+.tiptap-editor .tiptap h2 { color: var(--heading); font-size: 23px; line-height: 1.4; }
+.tiptap-editor .tiptap blockquote { margin-left: 0; padding-left: 16px; color: var(--muted); border-left: 3px solid #9db8e7; }
+.tiptap-editor .tiptap ul, .tiptap-editor .tiptap ol { padding-left: 24px; }
+.editor-state { min-height: 300px; display: grid; place-content: center; gap: 10px; color: var(--muted); text-align: center; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; }
+.editor-state p { margin: 0; }
+.editor-state a { color: var(--blue); }
+.editor-state.is-error { color: #b42318; }
 
 @media (min-width: 1301px) and (min-height: 780px) {
   .dashboard-layout { height: 100vh; min-height: 0; }
