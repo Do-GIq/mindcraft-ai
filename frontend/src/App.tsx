@@ -105,7 +105,12 @@ function DashboardHeader() {
 }
 
 function DashboardPage() {
-  const projectsQuery = useQuery({ queryKey: projectsQueryKey, queryFn: fetchProjects })
+  const userId = useAuthStore((state) => state.user?.id)
+  const projectsQuery = useQuery({
+    queryKey: projectsQueryKey(userId),
+    queryFn: fetchProjects,
+    enabled: userId !== undefined,
+  })
 
   return (
     <>

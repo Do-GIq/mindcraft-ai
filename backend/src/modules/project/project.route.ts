@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { requireAuth } from '../auth/auth.middleware.js'
 import {
   createProjectController,
   deleteProjectController,
@@ -7,6 +8,7 @@ import {
 
 const projectRouter = Router()
 
+projectRouter.use(requireAuth)
 projectRouter.get('/', getProjectsController)
 projectRouter.post('/', createProjectController)
 projectRouter.delete('/:id', deleteProjectController)

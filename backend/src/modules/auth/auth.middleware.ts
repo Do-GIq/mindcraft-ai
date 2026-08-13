@@ -5,6 +5,10 @@ export type AuthenticatedRequest = Request & {
   authUserId: number
 }
 
+export function getAuthenticatedUserId(req: Request) {
+  return (req as AuthenticatedRequest).authUserId
+}
+
 function getJwtSecret() {
   const jwtSecret = process.env.JWT_SECRET
 

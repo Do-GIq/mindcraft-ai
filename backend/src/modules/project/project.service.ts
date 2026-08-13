@@ -6,28 +6,20 @@ type CreateProjectInput = {
   description?: string
 }
 
-export function getProjects() {
+export function getProjects(userId: number) {
   return prisma.project.findMany({
+    where: { userId },
     orderBy: {
       updatedAt: 'desc',
     },
   })
 }
 
-export function createProject(data: CreateProjectInput) {
-  return prisma.project.create({ data })
+export function createProject(userId: number, data: CreateProjectInput) {
+  return prisma.project.create({ data: { ...data, userId } })
 }
 
-export async function deleteProject(id: number) {
-  const project = await prisma.project.findUnique({
-    where: { id },
-    select: { id: true },
-  })
-
-  if (!project) {
-    return false
-  }
-
-  await prisma.project.delete({ where: { id } })
-  return true
+export async function deleteProject(userId: number, id: number) {
+  const result = await prisma.project.deleteMany({ where: { id, userId } })
+  return result.count > 0
 }

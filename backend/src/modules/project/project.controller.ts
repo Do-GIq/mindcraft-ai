@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+import { getAuthenticatedUserId } from '../auth/auth.middleware.js'
 import { createProject, deleteProject, getProjects } from './project.service.js'
 
 type CreateProjectBody = {
@@ -7,9 +8,9 @@ type CreateProjectBody = {
   description?: unknown
 }
 
-export async function getProjectsController(_req: Request, res: Response) {
+export async function getProjectsController(req: Request, res: Response) {
   try {
-    const projects = await getProjects()
+    const projects = await getProjects(getAuthenticatedUserId(req))
     res.status(200).json(projects)
   } catch (error) {
     console.error('Failed to get projects:', error)
@@ -32,7 +33,7 @@ export async function createProjectController(
   const description = typeof req.body.description === 'string' ? req.body.description : undefined
 
   try {
-    const project = await createProject({
+    const project = await createProject(getAuthenticatedUserId(req), {
       title,
       ...(type !== undefined ? { type } : {}),
       ...(description !== undefined ? { description } : {}),
@@ -56,7 +57,7 @@ export async function deleteProjectController(
   }
 
   try {
-    const deleted = await deleteProject(id)
+    const deleted = await deleteProject(getAuthenticatedUserId(req), id)
 
     if (!deleted) {
       res.status(404).json({ message: 'Project not found' })

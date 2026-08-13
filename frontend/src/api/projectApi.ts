@@ -1,9 +1,10 @@
 import type { CreateProjectInput, Project } from '../types/project'
+import { authenticatedFetch } from './authenticatedFetch'
 
-export const projectsQueryKey = ['projects'] as const
+export const projectsQueryKey = (userId: number | undefined) => ['projects', userId] as const
 
 export async function fetchProjects(): Promise<Project[]> {
-  const response = await fetch('/api/projects')
+  const response = await authenticatedFetch('/api/projects')
 
   if (!response.ok) {
     throw new Error('项目加载失败')
@@ -13,7 +14,7 @@ export async function fetchProjects(): Promise<Project[]> {
 }
 
 export async function createProject(input: CreateProjectInput): Promise<Project> {
-  const response = await fetch('/api/projects', {
+  const response = await authenticatedFetch('/api/projects', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
@@ -27,7 +28,7 @@ export async function createProject(input: CreateProjectInput): Promise<Project>
 }
 
 export async function deleteProject(id: number): Promise<void> {
-  const response = await fetch(`/api/projects/${id}`, { method: 'DELETE' })
+  const response = await authenticatedFetch(`/api/projects/${id}`, { method: 'DELETE' })
 
   if (!response.ok) {
     throw new Error('项目删除失败')

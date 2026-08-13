@@ -3,9 +3,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FolderOpen, Plus, Trash2, X } from 'lucide-react'
 import { createProject, deleteProject, fetchProjects, projectsQueryKey } from '../api/projectApi'
 import type { Project } from '../types/project'
+import { useAuthStore } from '../stores/authStore'
 
 function ProjectsPage() {
   const queryClient = useQueryClient()
+  const userId = useAuthStore((state) => state.user?.id)
+  const currentProjectsQueryKey = projectsQueryKey(userId)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [type, setType] = useState('')
@@ -13,13 +16,14 @@ function ProjectsPage() {
   const [validationError, setValidationError] = useState('')
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
   const { data: projects, isPending, isError } = useQuery({
-    queryKey: projectsQueryKey,
+    queryKey: currentProjectsQueryKey,
     queryFn: fetchProjects,
+    enabled: userId !== undefined,
   })
   const createMutation = useMutation({
     mutationFn: createProject,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+      await queryClient.invalidateQueries({ queryKey: currentProjectsQueryKey })
       setTitle('')
       setType('')
       setDescription('')
@@ -30,7 +34,7 @@ function ProjectsPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteProject,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: projectsQueryKey })
+      await queryClient.invalidateQueries({ queryKey: currentProjectsQueryKey })
       setProjectToDelete(null)
     },
   })
