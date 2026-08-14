@@ -40,7 +40,7 @@ export async function getDocumentController(req: Request<DocumentParams>, res: R
 
     res.status(200).json(document)
   } catch (error) {
-    console.error('Failed to get document:', error)
+    req.logger.error({ err: error }, 'failed to get document')
     res.status(500).json({ message: 'Failed to get document' })
   }
 }
@@ -94,7 +94,7 @@ export async function updateDocumentController(
     })
     res.status(200).json(updated)
   } catch (error) {
-    console.error('Failed to update document:', error)
+    req.logger.error({ err: error }, 'failed to update document')
     res.status(500).json({ message: 'Failed to update document' })
   }
 }
@@ -116,7 +116,7 @@ export async function getDocumentsController(req: Request<ProjectParams>, res: R
 
     res.status(200).json(await getDocuments(projectId))
   } catch (error) {
-    console.error('Failed to get documents:', error)
+    req.logger.error({ err: error }, 'failed to get documents')
     res.status(500).json({ message: 'Failed to get documents' })
   }
 }
@@ -143,7 +143,7 @@ export async function createDocumentController(
 
     res.status(201).json(await createDocument(projectId, title || '未命名文档'))
   } catch (error) {
-    console.error('Failed to create document:', error)
+    req.logger.error({ err: error }, 'failed to create document')
     res.status(500).json({ message: 'Failed to create document' })
   }
 }

@@ -48,7 +48,7 @@ export async function registerController(
 
     res.status(201).json(result)
   } catch (error) {
-    console.error('Failed to register user:', error)
+    req.logger.error({ err: error }, 'failed to register user')
     res.status(500).json({ message: 'Failed to register user' })
   }
 }
@@ -74,8 +74,7 @@ export async function loginController(
 
     res.status(200).json(result)
   } catch (error) {
-    console.error('Failed to log in:', error)
-    console.dir(error, { depth: null });
+    req.logger.error({ err: error }, 'failed to log in')
     res.status(500).json({ message: 'Failed to log in' })
   }
 }
@@ -91,7 +90,7 @@ export async function meController(req: Request, res: Response) {
 
     res.status(200).json(user)
   } catch (error) {
-    console.error('Failed to get current user:', error)
+    req.logger.error({ err: error }, 'failed to get current user')
     res.status(500).json({ message: 'Failed to get current user' })
   }
 }

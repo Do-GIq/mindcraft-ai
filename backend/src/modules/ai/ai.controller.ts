@@ -1,5 +1,11 @@
 import type { Request, Response } from 'express'
-import { AiConfigurationError, AiProviderError, createAiTextStream } from './ai.service.js'
+import { performance } from 'node:perf_hooks'
+import {
+  AiConfigurationError,
+  AiProviderError,
+  createAiTextStream,
+  getAiLogMetadata,
+} from './ai.service.js'
 
 type GenerateBody = { prompt?: unknown }
 
@@ -30,6 +36,11 @@ export async function generateController(
   }
 
   const abortController = new AbortController()
+  const startedAt = performance.now()
+  const logContext = {
+    ...getAiLogMetadata(),
+    promptLength: prompt.length,
+  }
   let streamStarted = false
   let streamFinished = false
 
@@ -66,31 +77,46 @@ export async function generateController(
       writeEvent(res, 'done', {})
       streamFinished = true
       res.end()
+      req.logger.info(
+        { ...logContext, durationMs: Number((performance.now() - startedAt).toFixed(2)) },
+        'AI generation completed',
+      )
     }
   } catch (error) {
     if (isAbortError(error) || abortController.signal.aborted) {
+      req.logger.info(
+        { ...logContext, durationMs: Number((performance.now() - startedAt).toFixed(2)) },
+        'AI generation aborted',
+      )
       return
+    }
+
+    const errorContext = {
+      ...logContext,
+      durationMs: Number((performance.now() - startedAt).toFixed(2)),
+      errorType: error instanceof Error ? error.name : 'UnknownError',
+      err: error,
     }
 
     if (!streamStarted) {
       if (error instanceof AiConfigurationError) {
-        console.error('AI generation unavailable: AI environment variables are not configured')
+        req.logger.error(errorContext, 'AI generation configuration is missing')
         res.status(500).json({ message: 'AI service is not configured' })
         return
       }
 
       if (error instanceof AiProviderError) {
-        console.error(`AI provider request failed with status ${error.status}`)
+        req.logger.error({ ...errorContext, providerStatus: error.status }, 'AI provider request failed')
         res.status(502).json({ message: 'AI generation failed' })
         return
       }
 
-      console.error('AI generation failed before streaming')
+      req.logger.error(errorContext, 'AI generation failed before streaming')
       res.status(500).json({ message: 'AI generation failed' })
       return
     }
 
-    console.error('AI generation stream failed')
+    req.logger.error(errorContext, 'AI generation stream failed')
     if (!res.destroyed) {
       writeEvent(res, 'error', { message: 'AI 生成失败' })
       streamFinished = true
