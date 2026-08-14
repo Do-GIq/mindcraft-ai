@@ -6,11 +6,17 @@ type ProviderChunk = {
   }>
 }
 
-export class AiConfigurationError extends Error {}
+export class AiConfigurationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AiConfigurationError'
+  }
+}
 
 export class AiProviderError extends Error {
   constructor(public readonly status: number) {
     super('AI provider request failed')
+    this.name = 'AiProviderError'
   }
 }
 
@@ -28,6 +34,24 @@ function getAiConfig() {
 
 function getCompletionUrl(baseUrl: string) {
   return baseUrl.endsWith('/chat/completions') ? baseUrl : `${baseUrl}/chat/completions`
+}
+
+export function getAiLogMetadata() {
+  const baseUrl = process.env.AI_BASE_URL
+  let provider = 'unconfigured'
+
+  if (baseUrl) {
+    try {
+      provider = new URL(baseUrl).hostname
+    } catch {
+      provider = 'invalid-base-url'
+    }
+  }
+
+  return {
+    provider,
+    model: process.env.AI_MODEL ?? 'unconfigured',
+  }
 }
 
 function extractText(data: unknown) {

@@ -13,7 +13,7 @@ export async function getProjectsController(req: Request, res: Response) {
     const projects = await getProjects(getAuthenticatedUserId(req))
     res.status(200).json(projects)
   } catch (error) {
-    console.error('Failed to get projects:', error)
+    req.logger.error({ err: error }, 'failed to get projects')
     res.status(500).json({ message: 'Failed to get projects' })
   }
 }
@@ -36,7 +36,7 @@ export async function getProjectController(req: Request<{ id: string }>, res: Re
 
     res.status(200).json(project)
   } catch (error) {
-    console.error('Failed to get project:', error)
+    req.logger.error({ err: error }, 'failed to get project')
     res.status(500).json({ message: 'Failed to get project' })
   }
 }
@@ -63,7 +63,7 @@ export async function createProjectController(
     })
     res.status(201).json(project)
   } catch (error) {
-    console.error('Failed to create project:', error)
+    req.logger.error({ err: error }, 'failed to create project')
     res.status(500).json({ message: 'Failed to create project' })
   }
 }
@@ -89,7 +89,7 @@ export async function deleteProjectController(
 
     res.status(204).send()
   } catch (error) {
-    console.error('Failed to delete project:', error)
+    req.logger.error({ err: error }, 'failed to delete project')
     res.status(500).json({ message: 'Failed to delete project' })
   }
 }
