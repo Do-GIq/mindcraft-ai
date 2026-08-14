@@ -75,6 +75,7 @@ export async function loginController(
     res.status(200).json(result)
   } catch (error) {
     console.error('Failed to log in:', error)
+    console.dir(error, { depth: null });
     res.status(500).json({ message: 'Failed to log in' })
   }
 }

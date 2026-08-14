@@ -28,6 +28,7 @@ import ProjectsPage from './pages/ProjectsPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
 import DocumentEditorPage from './pages/DocumentEditorPage'
 import AuthPage from './pages/AuthPage'
+import AiCreatePage from './pages/AiCreatePage'
 import { AuthRoute } from './components/auth/AuthRoute'
 import CreateProjectModal from './components/project/CreateProjectModal'
 import { useAuthStore } from './stores/authStore'
@@ -36,7 +37,7 @@ import './App.css'
 const navigationItems = [
   { label: '概览', icon: Home, to: '/' },
   { label: '我的项目', icon: Folder, to: '/projects' },
-  { label: 'AI 创作', icon: Sparkles },
+  { label: 'AI 创作', icon: Sparkles, to: '/ai' },
   { label: '文档', icon: FileText },
   { label: '历史版本', icon: Clock3 },
   { label: '数据统计', icon: BarChart3 },
@@ -157,6 +158,7 @@ function App() {
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="projects/:projectId/documents/:documentId" element={<DocumentEditorPage />} />
+        <Route path="ai" element={<AiCreatePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
