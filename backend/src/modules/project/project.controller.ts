@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import { getAuthenticatedUserId } from '../auth/auth.middleware.js'
 import { createProject, deleteProject, getProject, getProjects } from './project.service.js'
+import { captureRequestException } from '../../lib/sentry.js'
 
 type CreateProjectBody = {
   title?: unknown
@@ -14,6 +15,7 @@ export async function getProjectsController(req: Request, res: Response) {
     res.status(200).json(projects)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to get projects')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to get projects' })
   }
 }
@@ -37,6 +39,7 @@ export async function getProjectController(req: Request<{ id: string }>, res: Re
     res.status(200).json(project)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to get project')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to get project' })
   }
 }
@@ -64,6 +67,7 @@ export async function createProjectController(
     res.status(201).json(project)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to create project')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to create project' })
   }
 }
@@ -90,6 +94,7 @@ export async function deleteProjectController(
     res.status(204).send()
   } catch (error) {
     req.logger.error({ err: error }, 'failed to delete project')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to delete project' })
   }
 }
