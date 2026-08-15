@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { performance } from 'node:perf_hooks'
+import { captureRequestException } from '../../lib/sentry.js'
 import {
   AiConfigurationError,
   AiProviderError,
@@ -97,26 +98,35 @@ export async function generateController(
       errorType: error instanceof Error ? error.name : 'UnknownError',
       err: error,
     }
+    const sentryContext = {
+      ...logContext,
+      durationMs: errorContext.durationMs,
+      errorType: errorContext.errorType,
+    }
 
     if (!streamStarted) {
       if (error instanceof AiConfigurationError) {
         req.logger.error(errorContext, 'AI generation configuration is missing')
+        captureRequestException(req, error, sentryContext)
         res.status(500).json({ message: 'AI service is not configured' })
         return
       }
 
       if (error instanceof AiProviderError) {
         req.logger.error({ ...errorContext, providerStatus: error.status }, 'AI provider request failed')
+        captureRequestException(req, error, { ...sentryContext, providerStatus: error.status })
         res.status(502).json({ message: 'AI generation failed' })
         return
       }
 
       req.logger.error(errorContext, 'AI generation failed before streaming')
+      captureRequestException(req, error, sentryContext)
       res.status(500).json({ message: 'AI generation failed' })
       return
     }
 
     req.logger.error(errorContext, 'AI generation stream failed')
+    captureRequestException(req, error, sentryContext)
     if (!res.destroyed) {
       writeEvent(res, 'error', { message: 'AI 生成失败' })
       streamFinished = true

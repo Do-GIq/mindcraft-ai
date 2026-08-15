@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { performance } from 'node:perf_hooks'
 import type { NextFunction, Request, Response } from 'express'
+import * as Sentry from '@sentry/node'
 import { logger } from '../lib/logger.js'
 
 const MAX_REQUEST_ID_LENGTH = 128
@@ -24,6 +25,9 @@ export function requestContext(req: Request, res: Response, next: NextFunction) 
   req.requestId = requestId
   req.logger = logger.child({ requestId })
   res.setHeader('x-request-id', requestId)
+  if (Sentry.isInitialized()) {
+    Sentry.getIsolationScope().setTag('requestId', requestId)
+  }
   next()
 }
 

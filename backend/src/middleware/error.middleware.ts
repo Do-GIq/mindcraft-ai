@@ -19,8 +19,7 @@ export const notFoundHandler: RequestHandler = (req, res) => {
   res.status(404).json({ message: 'Route not found', requestId: req.requestId })
 }
 
-export const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
-  const status = getSafeStatus(error)
+export const errorLoggingHandler: ErrorRequestHandler = (error, req, _res, next) => {
   req.logger.error(
     {
       err: error,
@@ -29,6 +28,11 @@ export const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) =
     },
     'unhandled request error',
   )
+  next(error)
+}
+
+export const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
+  const status = getSafeStatus(error)
 
   if (res.headersSent) {
     next(error)

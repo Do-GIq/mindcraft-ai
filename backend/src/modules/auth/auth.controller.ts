@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 import type { AuthenticatedRequest } from './auth.middleware.js'
 import { getUserById, loginUser, registerUser } from './auth.service.js'
+import { captureRequestException } from '../../lib/sentry.js'
 
 type AuthBody = {
   email?: unknown
@@ -49,6 +50,7 @@ export async function registerController(
     res.status(201).json(result)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to register user')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to register user' })
   }
 }
@@ -75,6 +77,7 @@ export async function loginController(
     res.status(200).json(result)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to log in')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to log in' })
   }
 }
@@ -91,6 +94,7 @@ export async function meController(req: Request, res: Response) {
     res.status(200).json(user)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to get current user')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to get current user' })
   }
 }

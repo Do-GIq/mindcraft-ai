@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { getAuthenticatedUserId } from '../auth/auth.middleware.js'
+import { captureRequestException } from '../../lib/sentry.js'
 import {
   createDocument,
   findOwnedProject,
@@ -41,6 +42,7 @@ export async function getDocumentController(req: Request<DocumentParams>, res: R
     res.status(200).json(document)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to get document')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to get document' })
   }
 }
@@ -95,6 +97,7 @@ export async function updateDocumentController(
     res.status(200).json(updated)
   } catch (error) {
     req.logger.error({ err: error }, 'failed to update document')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to update document' })
   }
 }
@@ -117,6 +120,7 @@ export async function getDocumentsController(req: Request<ProjectParams>, res: R
     res.status(200).json(await getDocuments(projectId))
   } catch (error) {
     req.logger.error({ err: error }, 'failed to get documents')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to get documents' })
   }
 }
@@ -144,6 +148,7 @@ export async function createDocumentController(
     res.status(201).json(await createDocument(projectId, title || '未命名文档'))
   } catch (error) {
     req.logger.error({ err: error }, 'failed to create document')
+    captureRequestException(req, error)
     res.status(500).json({ message: 'Failed to create document' })
   }
 }
