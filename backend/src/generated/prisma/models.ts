@@ -10,5 +10,6 @@
  */
 export type * from './models/Project.js'
 export type * from './models/Document.js'
+export type * from './models/DocumentVersion.js'
 export type * from './models/User.js'
 export type * from './commonInputTypes.js'

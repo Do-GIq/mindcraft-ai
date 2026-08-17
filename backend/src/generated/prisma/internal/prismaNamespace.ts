@@ -399,6 +399,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Project: 'Project',
   Document: 'Document',
+  DocumentVersion: 'DocumentVersion',
   User: 'User'
 } as const
 
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "project" | "document" | "user"
+    modelProps: "project" | "document" | "documentVersion" | "user"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -551,6 +552,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocumentVersion: {
+      payload: Prisma.$DocumentVersionPayload<ExtArgs>
+      fields: Prisma.DocumentVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.DocumentVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload>
+        }
+        update: {
+          args: Prisma.DocumentVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.DocumentVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentVersion>
+        }
+        groupBy: {
+          args: Prisma.DocumentVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentVersionCountAggregateOutputType> | number
+        }
+      }
+    }
     User: {
       payload: Prisma.$UserPayload<ExtArgs>
       fields: Prisma.UserFieldRefs
@@ -682,6 +749,18 @@ export const DocumentScalarFieldEnum = {
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
+export const DocumentVersionScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  title: 'title',
+  content: 'content',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentVersionScalarFieldEnum = (typeof DocumentVersionScalarFieldEnum)[keyof typeof DocumentVersionScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -727,6 +806,14 @@ export const DocumentOrderByRelevanceFieldEnum = {
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
 
 
+export const DocumentVersionOrderByRelevanceFieldEnum = {
+  title: 'title',
+  content: 'content'
+} as const
+
+export type DocumentVersionOrderByRelevanceFieldEnum = (typeof DocumentVersionOrderByRelevanceFieldEnum)[keyof typeof DocumentVersionOrderByRelevanceFieldEnum]
+
+
 export const UserOrderByRelevanceFieldEnum = {
   email: 'email',
   passwordHash: 'passwordHash',
@@ -760,6 +847,13 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentVersionSource'
+ */
+export type EnumDocumentVersionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentVersionSource'>
     
 
 
@@ -922,6 +1016,7 @@ export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaC
 export type GlobalOmitConfig = {
   project?: Prisma.ProjectOmit
   document?: Prisma.DocumentOmit
+  documentVersion?: Prisma.DocumentVersionOmit
   user?: Prisma.UserOmit
 }
 

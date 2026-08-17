@@ -1,105 +1,26 @@
 import { Check, Copy, FilePenLine, LoaderCircle, Sparkles, Square } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import { AiStreamError, generateAiContent } from '../api/aiApi'
-
-type GenerationStatus = 'idle' | 'generating' | 'completed' | 'error'
-
-const MAX_PROMPT_LENGTH = 8_000
-
-function isAbortError(error: unknown) {
-  return error instanceof Error && error.name === 'AbortError'
-}
+import { useState } from 'react'
+import { MAX_AI_PROMPT_LENGTH, useAiGeneration } from '../hooks/useAiGeneration'
 
 export default function AiCreatePage() {
   const [prompt, setPrompt] = useState('')
-  const [output, setOutput] = useState('')
-  const [status, setStatus] = useState<GenerationStatus>('idle')
-  const [errorMessage, setErrorMessage] = useState('')
-  const [isCopied, setIsCopied] = useState(false)
-  const abortControllerRef = useRef<AbortController | null>(null)
-  const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => () => {
-    abortControllerRef.current?.abort()
-    if (copyFeedbackTimerRef.current) {
-      clearTimeout(copyFeedbackTimerRef.current)
-    }
-  }, [])
+  const generation = useAiGeneration()
 
   async function startGeneration() {
     const submittedPrompt = prompt.trim()
-    if (!submittedPrompt || submittedPrompt.length > MAX_PROMPT_LENGTH || status === 'generating') {
+    if (!submittedPrompt || submittedPrompt.length > MAX_AI_PROMPT_LENGTH || generation.isGenerating) {
       return
     }
 
-    const abortController = new AbortController()
-    abortControllerRef.current = abortController
-    if (copyFeedbackTimerRef.current) {
-      clearTimeout(copyFeedbackTimerRef.current)
-      copyFeedbackTimerRef.current = null
-    }
     setPrompt('')
-    setOutput('')
-    setIsCopied(false)
-    setErrorMessage('')
-    setStatus('generating')
-
-    try {
-      await generateAiContent(submittedPrompt, {
-        signal: abortController.signal,
-        onDelta: (text) => {
-          if (abortControllerRef.current === abortController) {
-            setOutput((current) => current + text)
-          }
-        },
-      })
-      if (abortControllerRef.current === abortController) {
-        setStatus('completed')
-      }
-    } catch (error) {
-      if (abortControllerRef.current !== abortController) {
-        return
-      }
-
-      if (isAbortError(error)) {
-        setStatus('idle')
-      } else {
-        setErrorMessage(error instanceof AiStreamError ? error.message : '请求失败，请稍后重试')
-        setStatus('error')
-      }
-    } finally {
-      if (abortControllerRef.current === abortController) {
-        abortControllerRef.current = null
-      }
-    }
+    await generation.start(submittedPrompt)
   }
 
   function stopGeneration() {
-    abortControllerRef.current?.abort()
+    generation.stop()
   }
 
-  async function copyOutput() {
-    if (!output) {
-      return
-    }
-
-    try {
-      await navigator.clipboard.writeText(output)
-      setIsCopied(true)
-      if (copyFeedbackTimerRef.current) {
-        clearTimeout(copyFeedbackTimerRef.current)
-      }
-      copyFeedbackTimerRef.current = setTimeout(() => {
-        setIsCopied(false)
-        copyFeedbackTimerRef.current = null
-      }, 1_800)
-    } catch {
-      setIsCopied(false)
-    }
-  }
-
-  const isGenerating = status === 'generating'
-  const isPromptInvalid = !prompt.trim() || prompt.trim().length > MAX_PROMPT_LENGTH
+  const isPromptInvalid = !prompt.trim() || prompt.trim().length > MAX_AI_PROMPT_LENGTH
 
   return (
     <div className="ai-create-page">
@@ -120,15 +41,15 @@ export default function AiCreatePage() {
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
             placeholder="例如：写一篇适合小红书发布的杭州周末旅行攻略，语气轻松，包含两日行程和美食推荐。"
-            maxLength={MAX_PROMPT_LENGTH + 1}
-            disabled={isGenerating}
+            maxLength={MAX_AI_PROMPT_LENGTH + 1}
+            disabled={generation.isGenerating}
           />
           <div className="ai-prompt-footer">
-            <span className={prompt.length > MAX_PROMPT_LENGTH ? 'is-over-limit' : ''}>{prompt.length} / {MAX_PROMPT_LENGTH}</span>
+            <span className={prompt.length > MAX_AI_PROMPT_LENGTH ? 'is-over-limit' : ''}>{prompt.length} / {MAX_AI_PROMPT_LENGTH}</span>
             <div className="ai-generation-actions">
-              {isGenerating && <button className="secondary-button" type="button" onClick={stopGeneration}><Square size={15} fill="currentColor" />停止生成</button>}
-              <button className="primary-button" type="button" onClick={startGeneration} disabled={isGenerating || isPromptInvalid}>
-                {isGenerating ? <><LoaderCircle className="spin-icon" size={18} />生成中...</> : <><Sparkles size={18} />开始生成</>}
+              {generation.isGenerating && <button className="secondary-button" type="button" onClick={stopGeneration}><Square size={15} fill="currentColor" />停止生成</button>}
+              <button className="primary-button" type="button" onClick={startGeneration} disabled={generation.isGenerating || isPromptInvalid}>
+                {generation.isGenerating ? <><LoaderCircle className="spin-icon" size={18} />生成中...</> : <><Sparkles size={18} />开始生成</>}
               </button>
             </div>
           </div>
@@ -138,19 +59,19 @@ export default function AiCreatePage() {
           <div className="ai-output-heading">
             <div><h2>生成结果</h2><p>内容将在生成过程中实时显示。</p></div>
             <div className="ai-output-actions">
-              {output && (
-                <button className="ai-copy-button" type="button" onClick={copyOutput}>
-                  {isCopied ? <Check size={15} /> : <Copy size={15} />}
-                  {isCopied ? '已复制' : '复制'}
+              {generation.output && (
+                <button className="ai-copy-button" type="button" onClick={generation.copy}>
+                  {generation.isCopied ? <Check size={15} /> : <Copy size={15} />}
+                  {generation.isCopied ? '已复制' : '复制'}
                 </button>
               )}
-              <span className={`generation-status is-${status}`}>
-                {status === 'generating' ? '正在生成' : status === 'completed' ? '生成完成' : status === 'error' ? '生成失败' : '等待生成'}
+              <span className={`generation-status is-${generation.status}`}>
+                {generation.status === 'generating' ? '正在生成' : generation.status === 'completed' ? '生成完成' : generation.status === 'error' ? '生成失败' : '等待生成'}
               </span>
             </div>
           </div>
-          <div className={`ai-output-content${output ? ' has-content' : ''}`}>
-            {output ? output : isGenerating ? (
+          <div className={`ai-output-content${generation.output ? ' has-content' : ''}`}>
+            {generation.output ? generation.output : generation.isGenerating ? (
               <div className="ai-stream-starting"><LoaderCircle className="spin-icon" size={22} />正在准备生成内容...</div>
             ) : (
               <div className="ai-empty-state">
@@ -160,7 +81,7 @@ export default function AiCreatePage() {
               </div>
             )}
           </div>
-          {errorMessage && <p className="ai-error-message" role="alert">{errorMessage}</p>}
+          {generation.errorMessage && <p className="ai-error-message" role="alert">{generation.errorMessage}</p>}
         </section>
       </div>
     </div>
