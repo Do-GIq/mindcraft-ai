@@ -230,6 +230,7 @@ export type DocumentWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
   versions?: Prisma.DocumentVersionListRelationFilter
+  aiGenerations?: Prisma.AiGenerationListRelationFilter
 }
 
 export type DocumentOrderByWithRelationInput = {
@@ -241,6 +242,7 @@ export type DocumentOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   project?: Prisma.ProjectOrderByWithRelationInput
   versions?: Prisma.DocumentVersionOrderByRelationAggregateInput
+  aiGenerations?: Prisma.AiGenerationOrderByRelationAggregateInput
   _relevance?: Prisma.DocumentOrderByRelevanceInput
 }
 
@@ -256,6 +258,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   project?: Prisma.XOR<Prisma.ProjectScalarRelationFilter, Prisma.ProjectWhereInput>
   versions?: Prisma.DocumentVersionListRelationFilter
+  aiGenerations?: Prisma.AiGenerationListRelationFilter
 }, "id">
 
 export type DocumentOrderByWithAggregationInput = {
@@ -291,6 +294,7 @@ export type DocumentCreateInput = {
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutDocumentsInput
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
+  aiGenerations?: Prisma.AiGenerationCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateInput = {
@@ -301,6 +305,7 @@ export type DocumentUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
+  aiGenerations?: Prisma.AiGenerationUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUpdateInput = {
@@ -310,6 +315,7 @@ export type DocumentUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutDocumentsNestedInput
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
+  aiGenerations?: Prisma.AiGenerationUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateInput = {
@@ -320,6 +326,7 @@ export type DocumentUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
+  aiGenerations?: Prisma.AiGenerationUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentCreateManyInput = {
@@ -405,6 +412,11 @@ export type DocumentScalarRelationFilter = {
   isNot?: Prisma.DocumentWhereInput
 }
 
+export type DocumentNullableScalarRelationFilter = {
+  is?: Prisma.DocumentWhereInput | null
+  isNot?: Prisma.DocumentWhereInput | null
+}
+
 export type DocumentCreateNestedManyWithoutProjectInput = {
   create?: Prisma.XOR<Prisma.DocumentCreateWithoutProjectInput, Prisma.DocumentUncheckedCreateWithoutProjectInput> | Prisma.DocumentCreateWithoutProjectInput[] | Prisma.DocumentUncheckedCreateWithoutProjectInput[]
   connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutProjectInput | Prisma.DocumentCreateOrConnectWithoutProjectInput[]
@@ -461,12 +473,29 @@ export type DocumentUpdateOneRequiredWithoutVersionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentUpdateToOneWithWhereWithoutVersionsInput, Prisma.DocumentUpdateWithoutVersionsInput>, Prisma.DocumentUncheckedUpdateWithoutVersionsInput>
 }
 
+export type DocumentCreateNestedOneWithoutAiGenerationsInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutAiGenerationsInput, Prisma.DocumentUncheckedCreateWithoutAiGenerationsInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutAiGenerationsInput
+  connect?: Prisma.DocumentWhereUniqueInput
+}
+
+export type DocumentUpdateOneWithoutAiGenerationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DocumentCreateWithoutAiGenerationsInput, Prisma.DocumentUncheckedCreateWithoutAiGenerationsInput>
+  connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutAiGenerationsInput
+  upsert?: Prisma.DocumentUpsertWithoutAiGenerationsInput
+  disconnect?: Prisma.DocumentWhereInput | boolean
+  delete?: Prisma.DocumentWhereInput | boolean
+  connect?: Prisma.DocumentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DocumentUpdateToOneWithWhereWithoutAiGenerationsInput, Prisma.DocumentUpdateWithoutAiGenerationsInput>, Prisma.DocumentUncheckedUpdateWithoutAiGenerationsInput>
+}
+
 export type DocumentCreateWithoutProjectInput = {
   title: string
   content: string
   createdAt?: Date | string
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
+  aiGenerations?: Prisma.AiGenerationCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutProjectInput = {
@@ -476,6 +505,7 @@ export type DocumentUncheckedCreateWithoutProjectInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
+  aiGenerations?: Prisma.AiGenerationUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutProjectInput = {
@@ -522,6 +552,7 @@ export type DocumentCreateWithoutVersionsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   project: Prisma.ProjectCreateNestedOneWithoutDocumentsInput
+  aiGenerations?: Prisma.AiGenerationCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentUncheckedCreateWithoutVersionsInput = {
@@ -531,6 +562,7 @@ export type DocumentUncheckedCreateWithoutVersionsInput = {
   projectId: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiGenerations?: Prisma.AiGenerationUncheckedCreateNestedManyWithoutDocumentInput
 }
 
 export type DocumentCreateOrConnectWithoutVersionsInput = {
@@ -555,6 +587,7 @@ export type DocumentUpdateWithoutVersionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   project?: Prisma.ProjectUpdateOneRequiredWithoutDocumentsNestedInput
+  aiGenerations?: Prisma.AiGenerationUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutVersionsInput = {
@@ -564,6 +597,61 @@ export type DocumentUncheckedUpdateWithoutVersionsInput = {
   projectId?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiGenerations?: Prisma.AiGenerationUncheckedUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentCreateWithoutAiGenerationsInput = {
+  title: string
+  content: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  project: Prisma.ProjectCreateNestedOneWithoutDocumentsInput
+  versions?: Prisma.DocumentVersionCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentUncheckedCreateWithoutAiGenerationsInput = {
+  id?: number
+  title: string
+  content: string
+  projectId: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  versions?: Prisma.DocumentVersionUncheckedCreateNestedManyWithoutDocumentInput
+}
+
+export type DocumentCreateOrConnectWithoutAiGenerationsInput = {
+  where: Prisma.DocumentWhereUniqueInput
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutAiGenerationsInput, Prisma.DocumentUncheckedCreateWithoutAiGenerationsInput>
+}
+
+export type DocumentUpsertWithoutAiGenerationsInput = {
+  update: Prisma.XOR<Prisma.DocumentUpdateWithoutAiGenerationsInput, Prisma.DocumentUncheckedUpdateWithoutAiGenerationsInput>
+  create: Prisma.XOR<Prisma.DocumentCreateWithoutAiGenerationsInput, Prisma.DocumentUncheckedCreateWithoutAiGenerationsInput>
+  where?: Prisma.DocumentWhereInput
+}
+
+export type DocumentUpdateToOneWithWhereWithoutAiGenerationsInput = {
+  where?: Prisma.DocumentWhereInput
+  data: Prisma.XOR<Prisma.DocumentUpdateWithoutAiGenerationsInput, Prisma.DocumentUncheckedUpdateWithoutAiGenerationsInput>
+}
+
+export type DocumentUpdateWithoutAiGenerationsInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  project?: Prisma.ProjectUpdateOneRequiredWithoutDocumentsNestedInput
+  versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
+}
+
+export type DocumentUncheckedUpdateWithoutAiGenerationsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.StringFieldUpdateOperationsInput | string
+  projectId?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentCreateManyProjectInput = {
@@ -580,6 +668,7 @@ export type DocumentUpdateWithoutProjectInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUpdateManyWithoutDocumentNestedInput
+  aiGenerations?: Prisma.AiGenerationUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateWithoutProjectInput = {
@@ -589,6 +678,7 @@ export type DocumentUncheckedUpdateWithoutProjectInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   versions?: Prisma.DocumentVersionUncheckedUpdateManyWithoutDocumentNestedInput
+  aiGenerations?: Prisma.AiGenerationUncheckedUpdateManyWithoutDocumentNestedInput
 }
 
 export type DocumentUncheckedUpdateManyWithoutProjectInput = {
@@ -606,10 +696,12 @@ export type DocumentUncheckedUpdateManyWithoutProjectInput = {
 
 export type DocumentCountOutputType = {
   versions: number
+  aiGenerations: number
 }
 
 export type DocumentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   versions?: boolean | DocumentCountOutputTypeCountVersionsArgs
+  aiGenerations?: boolean | DocumentCountOutputTypeCountAiGenerationsArgs
 }
 
 /**
@@ -629,6 +721,13 @@ export type DocumentCountOutputTypeCountVersionsArgs<ExtArgs extends runtime.Typ
   where?: Prisma.DocumentVersionWhereInput
 }
 
+/**
+ * DocumentCountOutputType without action
+ */
+export type DocumentCountOutputTypeCountAiGenerationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiGenerationWhereInput
+}
+
 
 export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -639,6 +738,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   updatedAt?: boolean
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   versions?: boolean | Prisma.Document$versionsArgs<ExtArgs>
+  aiGenerations?: boolean | Prisma.Document$aiGenerationsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["document"]>
 
@@ -657,6 +757,7 @@ export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   project?: boolean | Prisma.ProjectDefaultArgs<ExtArgs>
   versions?: boolean | Prisma.Document$versionsArgs<ExtArgs>
+  aiGenerations?: boolean | Prisma.Document$aiGenerationsArgs<ExtArgs>
   _count?: boolean | Prisma.DocumentCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -665,6 +766,7 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     project: Prisma.$ProjectPayload<ExtArgs>
     versions: Prisma.$DocumentVersionPayload<ExtArgs>[]
+    aiGenerations: Prisma.$AiGenerationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1015,6 +1117,7 @@ export interface Prisma__DocumentClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   project<T extends Prisma.ProjectDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProjectDefaultArgs<ExtArgs>>): Prisma.Prisma__ProjectClient<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   versions<T extends Prisma.Document$versionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$versionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiGenerations<T extends Prisma.Document$aiGenerationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Document$aiGenerationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiGenerationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1419,6 +1522,30 @@ export type Document$versionsArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.DocumentVersionScalarFieldEnum | Prisma.DocumentVersionScalarFieldEnum[]
+}
+
+/**
+ * Document.aiGenerations
+ */
+export type Document$aiGenerationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiGeneration
+   */
+  select?: Prisma.AiGenerationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiGeneration
+   */
+  omit?: Prisma.AiGenerationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiGenerationInclude<ExtArgs> | null
+  where?: Prisma.AiGenerationWhereInput
+  orderBy?: Prisma.AiGenerationOrderByWithRelationInput | Prisma.AiGenerationOrderByWithRelationInput[]
+  cursor?: Prisma.AiGenerationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiGenerationScalarFieldEnum | Prisma.AiGenerationScalarFieldEnum[]
 }
 
 /**

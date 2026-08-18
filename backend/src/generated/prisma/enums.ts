@@ -16,3 +16,12 @@ export const DocumentVersionSource = {
 } as const
 
 export type DocumentVersionSource = (typeof DocumentVersionSource)[keyof typeof DocumentVersionSource]
+
+
+export const AiGenerationStatus = {
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  ABORTED: 'ABORTED'
+} as const
+
+export type AiGenerationStatus = (typeof AiGenerationStatus)[keyof typeof AiGenerationStatus]

@@ -23,14 +23,15 @@ model Project {
 }
 
 model Document {
-  id        Int               @id @default(autoincrement())
-  title     String
-  content   String            @db.Text
-  projectId Int
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  versions  DocumentVersion[]
+  id            Int               @id @default(autoincrement())
+  title         String
+  content       String            @db.Text
+  projectId     Int
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  project       Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions      DocumentVersion[]
+  aiGenerations AiGeneration[]
 
   @@index([projectId])
 }
@@ -54,11 +55,37 @@ enum DocumentVersionSource {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
-  passwordHash String
-  name         String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  projects     Project[]
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  passwordHash  String
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  projects      Project[]
+  aiGenerations AiGeneration[]
+}
+
+model AiGeneration {
+  id           Int                @id @default(autoincrement())
+  userId       Int
+  documentId   Int?
+  provider     String
+  model        String
+  status       AiGenerationStatus
+  inputChars   Int
+  outputChars  Int                @default(0)
+  firstTokenMs Int?
+  durationMs   Int
+  createdAt    DateTime           @default(now())
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  document     Document?          @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([documentId])
+}
+
+enum AiGenerationStatus {
+  SUCCESS
+  FAILED
+  ABORTED
 }

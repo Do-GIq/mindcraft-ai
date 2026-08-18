@@ -37,3 +37,8 @@ export type DocumentVersion = Prisma.DocumentVersionModel
  * 
  */
 export type User = Prisma.UserModel
+/**
+ * Model AiGeneration
+ * 
+ */
+export type AiGeneration = Prisma.AiGenerationModel
