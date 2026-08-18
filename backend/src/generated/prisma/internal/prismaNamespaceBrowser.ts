@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Project: 'Project',
   Document: 'Document',
+  DocumentVersion: 'DocumentVersion',
   User: 'User'
 } as const
 
@@ -98,6 +99,18 @@ export const DocumentScalarFieldEnum = {
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
+export const DocumentVersionScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  title: 'title',
+  content: 'content',
+  source: 'source',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentVersionScalarFieldEnum = (typeof DocumentVersionScalarFieldEnum)[keyof typeof DocumentVersionScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
@@ -141,6 +154,14 @@ export const DocumentOrderByRelevanceFieldEnum = {
 } as const
 
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
+
+
+export const DocumentVersionOrderByRelevanceFieldEnum = {
+  title: 'title',
+  content: 'content'
+} as const
+
+export type DocumentVersionOrderByRelevanceFieldEnum = (typeof DocumentVersionOrderByRelevanceFieldEnum)[keyof typeof DocumentVersionOrderByRelevanceFieldEnum]
 
 
 export const UserOrderByRelevanceFieldEnum = {

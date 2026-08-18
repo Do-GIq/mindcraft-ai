@@ -164,6 +164,23 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type EnumDocumentVersionSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentVersionSource | Prisma.EnumDocumentVersionSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentVersionSource[]
+  notIn?: $Enums.DocumentVersionSource[]
+  not?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel> | $Enums.DocumentVersionSource
+}
+
+export type EnumDocumentVersionSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentVersionSource | Prisma.EnumDocumentVersionSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentVersionSource[]
+  notIn?: $Enums.DocumentVersionSource[]
+  not?: Prisma.NestedEnumDocumentVersionSourceWithAggregatesFilter<$PrismaModel> | $Enums.DocumentVersionSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel>
+}
+
 export type NestedIntFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
   in?: number[]
@@ -329,6 +346,23 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumDocumentVersionSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentVersionSource | Prisma.EnumDocumentVersionSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentVersionSource[]
+  notIn?: $Enums.DocumentVersionSource[]
+  not?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel> | $Enums.DocumentVersionSource
+}
+
+export type NestedEnumDocumentVersionSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.DocumentVersionSource | Prisma.EnumDocumentVersionSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.DocumentVersionSource[]
+  notIn?: $Enums.DocumentVersionSource[]
+  not?: Prisma.NestedEnumDocumentVersionSourceWithAggregatesFilter<$PrismaModel> | $Enums.DocumentVersionSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel>
 }
 
 

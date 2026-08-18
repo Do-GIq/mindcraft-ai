@@ -9,7 +9,10 @@
 * 🟢 You can import this file directly.
 */
 
+export const DocumentVersionSource = {
+  AUTO: 'AUTO',
+  MANUAL: 'MANUAL',
+  RESTORE: 'RESTORE'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type DocumentVersionSource = (typeof DocumentVersionSource)[keyof typeof DocumentVersionSource]

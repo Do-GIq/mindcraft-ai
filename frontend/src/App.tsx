@@ -37,9 +37,6 @@ import './App.css'
 const navigationItems = [
   { label: '概览', icon: Home, to: '/' },
   { label: '我的项目', icon: Folder, to: '/projects' },
-  { label: 'AI 创作', icon: Sparkles, to: '/ai' },
-  { label: '文档', icon: FileText },
-  { label: '历史版本', icon: Clock3 },
   { label: '数据统计', icon: BarChart3 },
   { label: '设置', icon: Settings },
 ]

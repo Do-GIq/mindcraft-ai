@@ -23,15 +23,34 @@ model Project {
 }
 
 model Document {
-  id        Int      @id @default(autoincrement())
+  id        Int               @id @default(autoincrement())
   title     String
-  content   String   @db.Text
+  content   String            @db.Text
   projectId Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  project   Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions  DocumentVersion[]
 
   @@index([projectId])
+}
+
+model DocumentVersion {
+  id         Int                   @id @default(autoincrement())
+  documentId Int
+  title      String
+  content    String                @db.Text
+  source     DocumentVersionSource
+  createdAt  DateTime              @default(now())
+  document   Document              @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId, createdAt])
+}
+
+enum DocumentVersionSource {
+  AUTO
+  MANUAL
+  RESTORE
 }
 
 model User {

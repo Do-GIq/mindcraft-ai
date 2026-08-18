@@ -1,4 +1,13 @@
-import type { CreateDocumentInput, Document, UpdateDocumentInput } from '../types/document'
+import type {
+  CreateDocumentInput,
+  CreateDocumentVersionResult,
+  Document,
+  DocumentVersion,
+  DocumentVersionSource,
+  DocumentVersionSummary,
+  RestoreDocumentVersionResult,
+  UpdateDocumentInput,
+} from '../types/document'
 import { authenticatedFetch } from './authenticatedFetch'
 
 export const documentsQueryKey = (
@@ -8,6 +17,9 @@ export const documentsQueryKey = (
 
 export const documentQueryKey = (userId: number | undefined, documentId: number) =>
   ['document', userId, documentId] as const
+
+export const documentVersionsQueryKey = (userId: number | undefined, documentId: number) =>
+  ['document-versions', userId, documentId] as const
 
 export class DocumentApiError extends Error {
   status: number
@@ -59,4 +71,41 @@ export async function updateDocument(id: number, input: UpdateDocumentInput): Pr
   })
   if (!response.ok) throw new DocumentApiError(response.status)
   return response.json() as Promise<Document>
+}
+
+export async function fetchDocumentVersions(id: number): Promise<DocumentVersionSummary[]> {
+  const response = await authenticatedFetch(`/api/documents/${id}/versions`)
+  if (!response.ok) throw new DocumentApiError(response.status)
+  return response.json() as Promise<DocumentVersionSummary[]>
+}
+
+export async function fetchDocumentVersion(id: number, versionId: number): Promise<DocumentVersion> {
+  const response = await authenticatedFetch(`/api/documents/${id}/versions/${versionId}`)
+  if (!response.ok) throw new DocumentApiError(response.status)
+  return response.json() as Promise<DocumentVersion>
+}
+
+export async function createDocumentVersion(
+  id: number,
+  source: Exclude<DocumentVersionSource, 'RESTORE'>,
+  snapshot?: { title: string; content: string },
+): Promise<CreateDocumentVersionResult> {
+  const response = await authenticatedFetch(`/api/documents/${id}/versions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ source, ...snapshot }),
+  })
+  if (!response.ok) throw new DocumentApiError(response.status)
+  return response.json() as Promise<CreateDocumentVersionResult>
+}
+
+export async function restoreDocumentVersion(
+  id: number,
+  versionId: number,
+): Promise<RestoreDocumentVersionResult> {
+  const response = await authenticatedFetch(`/api/documents/${id}/versions/${versionId}/restore`, {
+    method: 'POST',
+  })
+  if (!response.ok) throw new DocumentApiError(response.status)
+  return response.json() as Promise<RestoreDocumentVersionResult>
 }
