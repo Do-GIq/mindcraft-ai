@@ -51,11 +51,11 @@ async function getResponseError(response: Response) {
   }
 }
 
-export async function generateAiContent(prompt: string, { signal, onDelta }: StreamCallbacks) {
+export async function generateAiContent(prompt: string, { signal, onDelta }: StreamCallbacks, documentId?: number) {
   const response = await authenticatedFetch('/api/ai/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, ...(documentId ? { documentId } : {}) }),
     signal,
   })
 

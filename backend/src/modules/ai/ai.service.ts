@@ -54,6 +54,20 @@ export function getAiLogMetadata() {
   }
 }
 
+export function saveAiGenerationMetric(input: {
+  userId: number
+  documentId: number | null
+  provider: string
+  model: string
+  status: AiGenerationStatus
+  inputChars: number
+  outputChars: number
+  firstTokenMs: number | null
+  durationMs: number
+}) {
+  return prisma.aiGeneration.create({ data: input })
+}
+
 function extractText(data: unknown) {
   if (!data || typeof data !== 'object') {
     return ''
@@ -138,3 +152,5 @@ export async function createAiTextStream(prompt: string, signal: AbortSignal) {
 
   return parseProviderStream(response.body)
 }
+import type { AiGenerationStatus } from '../../generated/prisma/enums.js'
+import { prisma } from '../../db/prisma.js'

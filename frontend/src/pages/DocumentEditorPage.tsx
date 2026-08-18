@@ -189,7 +189,7 @@ function DocumentEditorPage() {
 
     setAiPrompt('')
     setInsertError('')
-    void aiGeneration.start(submittedPrompt)
+    void aiGeneration.start(submittedPrompt, documentId)
   }
 
   function insertAiResult() {
@@ -240,8 +240,8 @@ function DocumentEditorPage() {
             <span className={`save-status is-${autosave.status}`}>
               {autosave.status === 'saving' ? '正在保存...' : autosave.status === 'unsaved' ? '未保存' : autosave.status === 'error' ? '保存失败' : '已保存'}
             </span>
-            <button className="secondary-button" type="button" onClick={() => { setIsHistoryOpen(true); setVersionFeedback('') }}><History size={17} />历史版本</button>
-            <button className="primary-button" type="button" onClick={handleSave} disabled={!editor || autosave.status === 'saving'}><Save size={18} />{autosave.status === 'saving' ? '保存中...' : '保存'}</button>
+            <button className="secondary-button editor-header-button" type="button" onClick={() => { setIsHistoryOpen(true); setVersionFeedback('') }}><History size={17} />历史版本</button>
+            <button className="primary-button editor-header-button" type="button" onClick={handleSave} disabled={!editor || autosave.status === 'saving'}><Save size={18} />{autosave.status === 'saving' ? '保存中...' : '保存'}</button>
           </div>
         </div>
       </header>

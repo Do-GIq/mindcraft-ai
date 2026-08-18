@@ -1,14 +1,17 @@
 import type { Request, Response } from 'express'
 import { performance } from 'node:perf_hooks'
 import { captureRequestException } from '../../lib/sentry.js'
+import { getAuthenticatedUserId } from '../auth/auth.middleware.js'
+import { getOwnedDocument } from '../document/document.service.js'
 import {
   AiConfigurationError,
   AiProviderError,
   createAiTextStream,
   getAiLogMetadata,
+  saveAiGenerationMetric,
 } from './ai.service.js'
 
-type GenerateBody = { prompt?: unknown }
+type GenerateBody = { prompt?: unknown; documentId?: unknown }
 
 const MAX_PROMPT_LENGTH = 8_000
 
@@ -18,6 +21,10 @@ function writeEvent(res: Response, event: string, data: object) {
 
 function isAbortError(error: unknown) {
   return error instanceof Error && error.name === 'AbortError'
+}
+
+function countTextCharacters(value: string) {
+  return Array.from(value).length
 }
 
 export async function generateController(
@@ -36,14 +43,58 @@ export async function generateController(
     return
   }
 
+
+  const userId = getAuthenticatedUserId(req)
+  let documentId: number | null = null
+  if (req.body?.documentId !== undefined) {
+    const parsedDocumentId = Number(req.body.documentId)
+    if (!Number.isInteger(parsedDocumentId) || parsedDocumentId <= 0) {
+      res.status(400).json({ message: 'Invalid document id' })
+      return
+    }
+    const document = await getOwnedDocument(userId, parsedDocumentId)
+    if (!document) {
+      res.status(404).json({ message: 'Document not found' })
+      return
+    }
+    documentId = document.id
+  }
+
   const abortController = new AbortController()
   const startedAt = performance.now()
+  const aiMetadata = getAiLogMetadata()
   const logContext = {
-    ...getAiLogMetadata(),
+    ...aiMetadata,
     promptLength: prompt.length,
   }
   let streamStarted = false
   let streamFinished = false
+  let outputChars = 0
+  let firstTokenMs: number | null = null
+  let metricRecorded = false
+
+  const recordMetric = async (status: 'SUCCESS' | 'FAILED' | 'ABORTED') => {
+    if (metricRecorded) return
+    metricRecorded = true
+    try {
+      await saveAiGenerationMetric({
+        userId,
+        documentId,
+        provider: aiMetadata.provider,
+        model: aiMetadata.model,
+        status,
+        inputChars: countTextCharacters(prompt),
+        outputChars,
+        firstTokenMs,
+        durationMs: Math.round(performance.now() - startedAt),
+      })
+    } catch (metricError) {
+      req.logger.error(
+        { err: metricError, userId, documentId, status },
+        'failed to persist AI generation metric',
+      )
+    }
+  }
 
   const abortUpstream = () => {
     if (!streamFinished) {
@@ -71,6 +122,8 @@ export async function generateController(
       if (abortController.signal.aborted || res.destroyed) {
         break
       }
+      if (firstTokenMs === null) firstTokenMs = Math.round(performance.now() - startedAt)
+      outputChars += countTextCharacters(text)
       writeEvent(res, 'delta', { text })
     }
 
@@ -78,13 +131,17 @@ export async function generateController(
       writeEvent(res, 'done', {})
       streamFinished = true
       res.end()
+      void recordMetric('SUCCESS')
       req.logger.info(
         { ...logContext, durationMs: Number((performance.now() - startedAt).toFixed(2)) },
         'AI generation completed',
       )
+    } else {
+      void recordMetric('ABORTED')
     }
   } catch (error) {
     if (isAbortError(error) || abortController.signal.aborted) {
+      void recordMetric('ABORTED')
       req.logger.info(
         { ...logContext, durationMs: Number((performance.now() - startedAt).toFixed(2)) },
         'AI generation aborted',
@@ -103,6 +160,8 @@ export async function generateController(
       durationMs: errorContext.durationMs,
       errorType: errorContext.errorType,
     }
+
+    void recordMetric('FAILED')
 
     if (!streamStarted) {
       if (error instanceof AiConfigurationError) {

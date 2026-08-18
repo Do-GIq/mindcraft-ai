@@ -16,7 +16,10 @@ function CreateProjectModal({ isOpen, onClose }: Props) {
   const mutation = useMutation({
     mutationFn: createProject,
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: projectsQueryKey(userId) })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: projectsQueryKey(userId) }),
+        queryClient.invalidateQueries({ queryKey: ['stats'] }),
+      ])
       setTitle(''); setType(''); setDescription(''); setValidationError(''); onClose()
     },
   })

@@ -400,7 +400,8 @@ export const ModelName = {
   Project: 'Project',
   Document: 'Document',
   DocumentVersion: 'DocumentVersion',
-  User: 'User'
+  User: 'User',
+  AiGeneration: 'AiGeneration'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +417,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "project" | "document" | "documentVersion" | "user"
+    modelProps: "project" | "document" | "documentVersion" | "user" | "aiGeneration"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -684,6 +685,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AiGeneration: {
+      payload: Prisma.$AiGenerationPayload<ExtArgs>
+      fields: Prisma.AiGenerationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiGenerationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiGenerationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload>
+        }
+        findFirst: {
+          args: Prisma.AiGenerationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiGenerationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload>
+        }
+        findMany: {
+          args: Prisma.AiGenerationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload>[]
+        }
+        create: {
+          args: Prisma.AiGenerationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload>
+        }
+        createMany: {
+          args: Prisma.AiGenerationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AiGenerationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload>
+        }
+        update: {
+          args: Prisma.AiGenerationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload>
+        }
+        deleteMany: {
+          args: Prisma.AiGenerationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiGenerationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AiGenerationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiGenerationPayload>
+        }
+        aggregate: {
+          args: Prisma.AiGenerationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiGeneration>
+        }
+        groupBy: {
+          args: Prisma.AiGenerationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiGenerationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiGenerationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiGenerationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -773,6 +840,23 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const AiGenerationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  documentId: 'documentId',
+  provider: 'provider',
+  model: 'model',
+  status: 'status',
+  inputChars: 'inputChars',
+  outputChars: 'outputChars',
+  firstTokenMs: 'firstTokenMs',
+  durationMs: 'durationMs',
+  createdAt: 'createdAt'
+} as const
+
+export type AiGenerationScalarFieldEnum = (typeof AiGenerationScalarFieldEnum)[keyof typeof AiGenerationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -823,6 +907,14 @@ export const UserOrderByRelevanceFieldEnum = {
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
 
 
+export const AiGenerationOrderByRelevanceFieldEnum = {
+  provider: 'provider',
+  model: 'model'
+} as const
+
+export type AiGenerationOrderByRelevanceFieldEnum = (typeof AiGenerationOrderByRelevanceFieldEnum)[keyof typeof AiGenerationOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -854,6 +946,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DocumentVersionSource'
  */
 export type EnumDocumentVersionSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentVersionSource'>
+    
+
+
+/**
+ * Reference to a field of type 'AiGenerationStatus'
+ */
+export type EnumAiGenerationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiGenerationStatus'>
     
 
 
@@ -1018,6 +1117,7 @@ export type GlobalOmitConfig = {
   document?: Prisma.DocumentOmit
   documentVersion?: Prisma.DocumentVersionOmit
   user?: Prisma.UserOmit
+  aiGeneration?: Prisma.AiGenerationOmit
 }
 
 /* Types for Logging */

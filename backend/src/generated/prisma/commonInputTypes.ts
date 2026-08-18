@@ -181,6 +181,23 @@ export type EnumDocumentVersionSourceWithAggregatesFilter<$PrismaModel = never> 
   _max?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel>
 }
 
+export type EnumAiGenerationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiGenerationStatus | Prisma.EnumAiGenerationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiGenerationStatus[]
+  notIn?: $Enums.AiGenerationStatus[]
+  not?: Prisma.NestedEnumAiGenerationStatusFilter<$PrismaModel> | $Enums.AiGenerationStatus
+}
+
+export type EnumAiGenerationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiGenerationStatus | Prisma.EnumAiGenerationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiGenerationStatus[]
+  notIn?: $Enums.AiGenerationStatus[]
+  not?: Prisma.NestedEnumAiGenerationStatusWithAggregatesFilter<$PrismaModel> | $Enums.AiGenerationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiGenerationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiGenerationStatusFilter<$PrismaModel>
+}
+
 export type NestedIntFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
   in?: number[]
@@ -363,6 +380,23 @@ export type NestedEnumDocumentVersionSourceWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel>
   _max?: Prisma.NestedEnumDocumentVersionSourceFilter<$PrismaModel>
+}
+
+export type NestedEnumAiGenerationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiGenerationStatus | Prisma.EnumAiGenerationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiGenerationStatus[]
+  notIn?: $Enums.AiGenerationStatus[]
+  not?: Prisma.NestedEnumAiGenerationStatusFilter<$PrismaModel> | $Enums.AiGenerationStatus
+}
+
+export type NestedEnumAiGenerationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AiGenerationStatus | Prisma.EnumAiGenerationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.AiGenerationStatus[]
+  notIn?: $Enums.AiGenerationStatus[]
+  not?: Prisma.NestedEnumAiGenerationStatusWithAggregatesFilter<$PrismaModel> | $Enums.AiGenerationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAiGenerationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAiGenerationStatusFilter<$PrismaModel>
 }
 
 

@@ -54,7 +54,8 @@ export const ModelName = {
   Project: 'Project',
   Document: 'Document',
   DocumentVersion: 'DocumentVersion',
-  User: 'User'
+  User: 'User',
+  AiGeneration: 'AiGeneration'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -123,6 +124,23 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const AiGenerationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  documentId: 'documentId',
+  provider: 'provider',
+  model: 'model',
+  status: 'status',
+  inputChars: 'inputChars',
+  outputChars: 'outputChars',
+  firstTokenMs: 'firstTokenMs',
+  durationMs: 'durationMs',
+  createdAt: 'createdAt'
+} as const
+
+export type AiGenerationScalarFieldEnum = (typeof AiGenerationScalarFieldEnum)[keyof typeof AiGenerationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -171,4 +189,12 @@ export const UserOrderByRelevanceFieldEnum = {
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
+export const AiGenerationOrderByRelevanceFieldEnum = {
+  provider: 'provider',
+  model: 'model'
+} as const
+
+export type AiGenerationOrderByRelevanceFieldEnum = (typeof AiGenerationOrderByRelevanceFieldEnum)[keyof typeof AiGenerationOrderByRelevanceFieldEnum]
 

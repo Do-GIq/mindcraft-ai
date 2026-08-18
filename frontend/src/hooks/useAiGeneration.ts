@@ -22,7 +22,7 @@ export function useAiGeneration() {
     if (copyFeedbackTimerRef.current) clearTimeout(copyFeedbackTimerRef.current)
   }, [])
 
-  const start = useCallback(async (prompt: string) => {
+  const start = useCallback(async (prompt: string, documentId?: number) => {
     const submittedPrompt = prompt.trim()
     if (!submittedPrompt || submittedPrompt.length > MAX_AI_PROMPT_LENGTH || abortControllerRef.current) {
       return
@@ -47,7 +47,7 @@ export function useAiGeneration() {
             setOutput((current) => current + text)
           }
         },
-      })
+      }, documentId)
       if (abortControllerRef.current === abortController) setStatus('completed')
     } catch (error) {
       if (abortControllerRef.current !== abortController) return
