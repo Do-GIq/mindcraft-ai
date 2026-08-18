@@ -16,6 +16,7 @@ import AuthPage from './pages/AuthPage'
 import AiCreatePage from './pages/AiCreatePage'
 import OverviewPage from './pages/OverviewPage'
 import StatisticsPage from './pages/StatisticsPage'
+import SettingsPage from './pages/SettingsPage'
 import { AuthRoute } from './components/auth/AuthRoute'
 import { useAuthStore } from './stores/authStore'
 import './App.css'
@@ -24,7 +25,7 @@ const navigationItems = [
   { label: '概览', icon: Home, to: '/' },
   { label: '我的项目', icon: Folder, to: '/projects' },
   { label: '数据统计', icon: BarChart3, to: '/stats' },
-  { label: '设置', icon: Settings },
+  { label: '设置', icon: Settings, to: '/settings' },
 ]
 
 function Sidebar() {
@@ -90,6 +91,7 @@ function App() {
       <Route element={<AuthRoute requireAuth><DashboardLayout /></AuthRoute>}>
         <Route index element={<OverviewPage />} />
         <Route path="stats" element={<StatisticsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="projects/:projectId/documents/:documentId" element={<DocumentEditorPage />} />

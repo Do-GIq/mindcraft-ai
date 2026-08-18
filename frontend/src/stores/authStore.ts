@@ -7,6 +7,7 @@ type AuthState = {
   accessToken: string | null
   isInitialized: boolean
   setAuth: (auth: AuthResponse) => void
+  setUser: (user: AuthUser) => void
   clearAuth: () => void
   initialize: () => Promise<void>
 }
@@ -19,6 +20,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.setItem(authTokenKey, accessToken)
     set({ accessToken, user, isInitialized: true })
   },
+  setUser: (user) => set({ user }),
   clearAuth: () => {
     localStorage.removeItem(authTokenKey)
     set({ accessToken: null, user: null, isInitialized: true })

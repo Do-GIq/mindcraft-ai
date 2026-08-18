@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import type { AuthenticatedRequest } from './auth.middleware.js'
-import { getUserById, loginUser, registerUser } from './auth.service.js'
+import { getUserById, loginUser, MIN_PASSWORD_LENGTH, registerUser } from './auth.service.js'
 import { captureRequestException } from '../../lib/sentry.js'
 
 type AuthBody = {
@@ -34,8 +34,8 @@ export async function registerController(
     return
   }
 
-  if (password.length < 8) {
-    res.status(400).json({ message: 'Password must be at least 8 characters' })
+  if (password.length < MIN_PASSWORD_LENGTH) {
+    res.status(400).json({ message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` })
     return
   }
 
