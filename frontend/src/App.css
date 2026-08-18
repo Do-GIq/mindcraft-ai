@@ -324,6 +324,28 @@ button, input, textarea { font: inherit; }
 .top-documents-list small, .top-documents-list time, .top-documents-list a > span:not(.document-rank) { color: var(--muted); font-size: 11px; }
 .statistics-empty .primary-button { display: inline-flex; text-decoration: none; }
 
+.settings-page { width: min(920px, 100%); margin: 0 auto; }
+.settings-header { margin-bottom: 20px; }
+.settings-header h1 { margin: 0 0 5px; color: var(--heading); font-size: 29px; }
+.settings-header p { margin: 0; color: var(--muted); font-size: 14px; }
+.settings-card { margin-bottom: 18px; padding: 22px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; }
+.settings-card-heading { display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+.settings-card-heading > span { width: 40px; height: 40px; display: grid; place-items: center; color: var(--blue); background: #edf3ff; border-radius: 9px; }
+.settings-card-heading h2 { margin: 0 0 4px; color: var(--heading); font-size: 18px; }
+.settings-card-heading p { margin: 0; color: var(--muted); font-size: 12px; }
+.settings-form-grid { display: grid; gap: 17px; padding: 20px 0; }
+.settings-form-grid label { display: grid; gap: 7px; color: var(--body); font-size: 13px; font-weight: 600; }
+.settings-form-grid input { width: 100%; height: 44px; padding: 0 13px; color: var(--heading); background: #fff; border: 1px solid #dce1e9; border-radius: 8px; outline: 0; }
+.settings-form-grid input:focus:not([readonly]) { border-color: #7aa4e8; box-shadow: 0 0 0 3px rgb(36 99 212 / 10%); }
+.settings-form-grid input[readonly] { color: #667085; background: #f6f7f9; cursor: default; }
+.settings-form-grid small { color: var(--muted); font-size: 11px; font-weight: 400; }
+.settings-form-footer { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.settings-form-footer .primary-button { min-width: 122px; justify-content: center; }
+.settings-message { margin: 0; font-size: 13px; }
+.settings-message.is-error { color: #b42318; }
+.settings-message.is-success { color: #168764; }
+.settings-loading { min-height: 320px; display: grid; place-items: center; color: var(--muted); }
+
 .ai-create-page { width: min(1180px, 100%); margin: 0 auto; }
 .ai-page-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
 .ai-page-icon { width: 48px; height: 48px; flex: 0 0 48px; display: grid; place-items: center; color: var(--blue); background: #eaf1ff; border-radius: 12px; }

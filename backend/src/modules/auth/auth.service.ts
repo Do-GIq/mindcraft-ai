@@ -9,6 +9,16 @@ type RegisterInput = {
   name?: string
 }
 
+export const MIN_PASSWORD_LENGTH = 8
+
+export function hashPassword(password: string) {
+  return hash(password, 12)
+}
+
+export function verifyPassword(password: string, passwordHash: string) {
+  return compare(password, passwordHash)
+}
+
 const safeUserSelect = {
   id: true,
   email: true,
@@ -43,7 +53,7 @@ export async function registerUser(input: RegisterInput) {
     return null
   }
 
-  const passwordHash = await hash(input.password, 12)
+  const passwordHash = await hashPassword(input.password)
   let user
 
   try {
@@ -69,7 +79,7 @@ export async function registerUser(input: RegisterInput) {
 export async function loginUser(email: string, password: string) {
   const userWithPassword = await prisma.user.findUnique({ where: { email } })
 
-  if (!userWithPassword || !await compare(password, userWithPassword.passwordHash)) {
+  if (!userWithPassword || !await verifyPassword(password, userWithPassword.passwordHash)) {
     return null
   }
 
