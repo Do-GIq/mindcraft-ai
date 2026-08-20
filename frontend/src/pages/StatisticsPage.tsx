@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import * as echarts from 'echarts'
 import { Activity, FileClock, FileText, FolderOpen, Type } from 'lucide-react'
 import { Link } from 'react-router'
+import TrendChart from '../components/stats/TrendChart'
 import {
   dashboardStatsQueryKey,
   fetchDashboardStats,
@@ -16,52 +17,6 @@ const rangeOptions: Array<{ value: StatsRange; label: string }> = [
   { value: '30d', label: '最近 30 天' },
   { value: '90d', label: '最近 90 天' },
 ]
-
-function ActivityTrendChart({ data, seriesName = '版本活动', color = '#4b7ddd' }: {
-  data: DashboardStats['activityTrend']
-  seriesName?: string
-  color?: string
-}) {
-  const chartRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!chartRef.current) return
-    const chart = echarts.init(chartRef.current)
-    chart.setOption({
-      animationDuration: 300,
-      color: [color],
-      grid: { left: 42, right: 20, top: 30, bottom: 34 },
-      tooltip: { trigger: 'axis' },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: data.map(({ date }) => date.slice(5).replace('-', '/')),
-        axisLine: { lineStyle: { color: '#dfe4ec' } },
-        axisLabel: { color: '#7b8494', hideOverlap: true },
-      },
-      yAxis: {
-        type: 'value',
-        minInterval: 1,
-        axisLabel: { color: '#7b8494' },
-        splitLine: { lineStyle: { color: '#edf0f4' } },
-      },
-      series: [{
-        name: seriesName,
-        type: 'line',
-        smooth: true,
-        symbolSize: 7,
-        data: data.map(({ count }) => count),
-        areaStyle: { color: 'rgba(75,125,221,.10)' },
-        lineStyle: { width: 2 },
-      }],
-    })
-    const observer = new ResizeObserver(() => chart.resize())
-    observer.observe(chartRef.current)
-    return () => { observer.disconnect(); chart.dispose() }
-  }, [color, data, seriesName])
-
-  return <div className="statistics-chart" ref={chartRef} />
-}
 
 function ProjectBreakdownChart({ data }: { data: DashboardStats['projectBreakdown'] }) {
   const chartRef = useRef<HTMLDivElement>(null)
@@ -172,36 +127,37 @@ export default function StatisticsPage() {
 
           <section className="statistics-card">
             <div className="statistics-card-heading"><div><Activity size={19} /><h2>AI 使用趋势</h2></div><span>按 AI generation 请求统计</span></div>
-            <ActivityTrendChart data={data.aiUsageTrend} seriesName="AI 生成次数" color="#13a08c" />
-          </section>
-
-          <section className="statistics-card">
-            <div className="statistics-card-heading"><div><Activity size={19} /><h2>版本活动趋势</h2></div><span>按历史版本快照统计</span></div>
-            <ActivityTrendChart data={data.activityTrend} />
+            <TrendChart data={data.aiUsageTrend} seriesName="AI 生成次数" color="#13a08c" />
           </section>
 
           <div className="statistics-lower-grid">
+            <section className="statistics-card">
+              <div className="statistics-card-heading"><div><Activity size={19} /><h2>版本活动趋势</h2></div><span>按历史版本快照统计</span></div>
+              <TrendChart data={data.activityTrend} seriesName="版本活动" />
+            </section>
+
             <section className="statistics-card">
               <div className="statistics-card-heading"><div><FolderOpen size={19} /><h2>项目内容分布</h2></div><span>按字符数排序，最多展示 8 个项目</span></div>
               <ProjectBreakdownChart data={data.projectBreakdown} />
             </section>
 
-            <section className="statistics-card top-documents-card">
-              <div className="statistics-card-heading"><div><FileText size={19} /><h2>内容量较高的文档</h2></div></div>
-              {data.topDocuments.length === 0 ? <div className="statistics-chart-empty">当前项目还没有文档</div> : (
-                <div className="top-documents-list">
-                  {data.topDocuments.map((document, index) => (
-                    <Link key={document.id} to={`/projects/${document.projectId}/documents/${document.id}`}>
-                      <span className="document-rank">{index + 1}</span>
-                      <div><strong>{document.title}</strong><small>{document.projectTitle}</small></div>
-                      <span>{document.characterCount.toLocaleString('zh-CN')} 字符</span>
-                      <time dateTime={document.updatedAt}>{formatDate(document.updatedAt)}</time>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </section>
           </div>
+
+          <section className="statistics-card top-documents-card">
+            <div className="statistics-card-heading"><div><FileText size={19} /><h2>内容量较高的文档</h2></div></div>
+            {data.topDocuments.length === 0 ? <div className="statistics-chart-empty">当前项目还没有文档</div> : (
+              <div className="top-documents-list">
+                {data.topDocuments.map((document, index) => (
+                  <Link key={document.id} to={`/projects/${document.projectId}/documents/${document.id}`}>
+                    <span className="document-rank">{index + 1}</span>
+                    <div><strong>{document.title}</strong><small>{document.projectTitle}</small></div>
+                    <span>{document.characterCount.toLocaleString('zh-CN')} 字符</span>
+                    <time dateTime={document.updatedAt}>{formatDate(document.updatedAt)}</time>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
         </>
       )}
     </section>
