@@ -59,8 +59,117 @@ function calculateSummary(projects: Awaited<ReturnType<typeof getUserStatsBase>>
   }
 }
 
+type DailyAiRow = {
+  date: string | Date
+  count: bigint | number
+  successCount: bigint | number
+  failedCount: bigint | number
+  generatedCharacterCount: bigint | number | null
+}
+
+type DailyVersionRow = { date: string | Date; count: bigint | number }
+
+function dateKey(value: string | Date) {
+  return value instanceof Date ? value.toISOString().slice(0, 10) : String(value)
+}
+
+function getUtcRange(days: number) {
+  const now = new Date()
+  const todayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  return {
+    start: new Date(todayStart - (days - 1) * 86_400_000),
+    end: new Date(todayStart + 86_400_000),
+  }
+}
+
+async function getAiSummary(userId: number, start: Date, end: Date) {
+  const where = { userId, createdAt: { gte: start, lt: end } }
+  const [aggregate, statusGroups] = await Promise.all([
+    prisma.aiGeneration.aggregate({
+      where,
+      _count: { _all: true },
+      _sum: { outputChars: true },
+      _avg: { durationMs: true, firstTokenMs: true },
+    }),
+    prisma.aiGeneration.groupBy({ by: ['status'], where, _count: { _all: true } }),
+  ])
+  const statusCounts = new Map(statusGroups.map((group) => [group.status, group._count._all]))
+  const generationCount = aggregate._count._all
+  const successCount = statusCounts.get('SUCCESS') ?? 0
+  const failedCount = statusCounts.get('FAILED') ?? 0
+
+  return {
+    generationCount,
+    successCount,
+    failedCount,
+    successRate: generationCount === 0
+      ? 0
+      : Number(((successCount / generationCount) * 100).toFixed(1)),
+    averageDurationMs: Math.round(aggregate._avg.durationMs ?? 0),
+    averageFirstTokenMs: Math.round(aggregate._avg.firstTokenMs ?? 0),
+    generatedCharacterCount: aggregate._sum.outputChars ?? 0,
+  }
+}
+
+async function getAiUsageTrend(userId: number, start: Date, end: Date, days: number) {
+  const rows = await prisma.$queryRaw<DailyAiRow[]>`
+    SELECT
+      DATE_FORMAT(createdAt, '%Y-%m-%d') AS date,
+      COUNT(*) AS count,
+      SUM(status = 'SUCCESS') AS successCount,
+      SUM(status = 'FAILED') AS failedCount,
+      COALESCE(SUM(outputChars), 0) AS generatedCharacterCount
+    FROM AiGeneration
+    WHERE userId = ${userId} AND createdAt >= ${start} AND createdAt < ${end}
+    GROUP BY DATE_FORMAT(createdAt, '%Y-%m-%d')
+    ORDER BY date ASC
+  `
+  const values = new Map(rows.map((row) => [dateKey(row.date), {
+    count: Number(row.count),
+    successCount: Number(row.successCount),
+    failedCount: Number(row.failedCount),
+    generatedCharacterCount: Number(row.generatedCharacterCount ?? 0),
+  }]))
+
+  return Array.from({ length: days }, (_, index) => {
+    const date = new Date(start.getTime() + index * 86_400_000).toISOString().slice(0, 10)
+    return {
+      date,
+      ...(values.get(date) ?? {
+        count: 0,
+        successCount: 0,
+        failedCount: 0,
+        generatedCharacterCount: 0,
+      }),
+    }
+  })
+}
+
+async function getVersionActivityTrend(userId: number, start: Date, end: Date, days: number) {
+  const rows = await prisma.$queryRaw<DailyVersionRow[]>`
+    SELECT DATE_FORMAT(v.createdAt, '%Y-%m-%d') AS date, COUNT(*) AS count
+    FROM DocumentVersion v
+    INNER JOIN Document d ON d.id = v.documentId
+    INNER JOIN Project p ON p.id = d.projectId
+    WHERE p.userId = ${userId} AND v.createdAt >= ${start} AND v.createdAt < ${end}
+    GROUP BY DATE_FORMAT(v.createdAt, '%Y-%m-%d')
+    ORDER BY date ASC
+  `
+  const values = new Map(rows.map((row) => [dateKey(row.date), Number(row.count)]))
+  return Array.from({ length: days }, (_, index) => {
+    const date = new Date(start.getTime() + index * 86_400_000).toISOString().slice(0, 10)
+    return { date, count: values.get(date) ?? 0 }
+  })
+}
+
 export async function getOverviewStats(userId: number) {
-  const projects = await getUserStatsBase(userId)
+  const thirtyDayRange = getUtcRange(30)
+  const sevenDayRange = getUtcRange(7)
+  const [projects, aiSummary, aiUsageTrend] = await Promise.all([
+    getUserStatsBase(userId),
+    getAiSummary(userId, thirtyDayRange.start, thirtyDayRange.end),
+    getAiUsageTrend(userId, sevenDayRange.start, sevenDayRange.end, 7),
+  ])
   const summary = calculateSummary(projects)
   const projectTitles = new Map(projects.map((project) => [project.id, project.title]))
   const documents = projects
@@ -68,12 +177,17 @@ export async function getOverviewStats(userId: number) {
     .sort((left, right) => right.updatedAt.getTime() - left.updatedAt.getTime())
 
   return {
-    summary,
+    summary: { ...summary, aiGenerationCount30d: aiSummary.generationCount },
+    aiUsageTrend,
     recentProjects: projects.slice(0, 5).map((project) => ({
       id: project.id,
       title: project.title,
       updatedAt: project.updatedAt,
       documentCount: project.documents.length,
+      characterCount: project.documents.reduce(
+        (total, document) => total + countVisibleCharacters(document.content),
+        0,
+      ),
     })),
     recentDocuments: documents.slice(0, 5).map((document) => ({
       id: document.id,
@@ -86,68 +200,17 @@ export async function getOverviewStats(userId: number) {
   }
 }
 
-function getUtcRange(days: number) {
-  const now = new Date()
-  const todayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  return {
-    start: new Date(todayStart - (days - 1) * 86_400_000),
-    end: new Date(todayStart + 86_400_000),
-  }
-}
-
 export async function getDashboardStats(userId: number, range: StatsRange) {
   const days = RANGE_DAYS[range]
   const { start, end } = getUtcRange(days)
-  const [projects, versionCount, versionActivity, aiGenerations] = await Promise.all([
+  const [projects, versionCount, activityTrend, aiSummary, aiUsageTrend] = await Promise.all([
     getUserStatsBase(userId),
     prisma.documentVersion.count({ where: { document: { project: { userId } } } }),
-    prisma.documentVersion.findMany({
-      where: { document: { project: { userId } }, createdAt: { gte: start, lt: end } },
-      select: { createdAt: true },
-    }),
-    prisma.aiGeneration.findMany({
-      where: { userId, createdAt: { gte: start, lt: end } },
-      select: {
-        status: true,
-        outputChars: true,
-        firstTokenMs: true,
-        durationMs: true,
-        createdAt: true,
-      },
-    }),
+    getVersionActivityTrend(userId, start, end, days),
+    getAiSummary(userId, start, end),
+    getAiUsageTrend(userId, start, end, days),
   ])
   const summary = calculateSummary(projects)
-  const activityByDate = new Map<string, number>()
-  for (const version of versionActivity) {
-    const date = version.createdAt.toISOString().slice(0, 10)
-    activityByDate.set(date, (activityByDate.get(date) ?? 0) + 1)
-  }
-
-  const activityTrend = Array.from({ length: days }, (_, index) => {
-    const date = new Date(start.getTime() + index * 86_400_000).toISOString().slice(0, 10)
-    return { date, count: activityByDate.get(date) ?? 0 }
-  })
-  const successCount = aiGenerations.filter(({ status }) => status === 'SUCCESS').length
-  const failedCount = aiGenerations.filter(({ status }) => status === 'FAILED').length
-  const firstTokenValues = aiGenerations.flatMap(({ firstTokenMs }) =>
-    firstTokenMs === null ? [] : [firstTokenMs],
-  )
-  const average = (values: number[]) => values.length === 0
-    ? 0
-    : Math.round(values.reduce((total, value) => total + value, 0) / values.length)
-  const aiActivityByDate = new Map<string, { count: number; successCount: number; failedCount: number }>()
-  for (const generation of aiGenerations) {
-    const date = generation.createdAt.toISOString().slice(0, 10)
-    const current = aiActivityByDate.get(date) ?? { count: 0, successCount: 0, failedCount: 0 }
-    current.count += 1
-    if (generation.status === 'SUCCESS') current.successCount += 1
-    if (generation.status === 'FAILED') current.failedCount += 1
-    aiActivityByDate.set(date, current)
-  }
-  const aiUsageTrend = Array.from({ length: days }, (_, index) => {
-    const date = new Date(start.getTime() + index * 86_400_000).toISOString().slice(0, 10)
-    return { date, ...(aiActivityByDate.get(date) ?? { count: 0, successCount: 0, failedCount: 0 }) }
-  })
   const projectBreakdown = projects
     .map((project) => ({
       projectId: project.id,
@@ -176,20 +239,7 @@ export async function getDashboardStats(userId: number, range: StatsRange) {
 
   return {
     summary: { ...summary, versionCount },
-    aiSummary: {
-      generationCount: aiGenerations.length,
-      successCount,
-      failedCount,
-      successRate: aiGenerations.length === 0
-        ? 0
-        : Number(((successCount / aiGenerations.length) * 100).toFixed(1)),
-      averageDurationMs: average(aiGenerations.map(({ durationMs }) => durationMs)),
-      averageFirstTokenMs: average(firstTokenValues),
-      generatedCharacterCount: aiGenerations.reduce(
-        (total, generation) => total + generation.outputChars,
-        0,
-      ),
-    },
+    aiSummary,
     aiUsageTrend,
     activityTrend,
     projectBreakdown,

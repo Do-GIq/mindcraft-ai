@@ -9,12 +9,20 @@ export type StatsSummary = {
 }
 
 export type OverviewStats = {
-  summary: StatsSummary
+  summary: StatsSummary & { aiGenerationCount30d: number }
+  aiUsageTrend: Array<{
+    date: string
+    count: number
+    successCount: number
+    failedCount: number
+    generatedCharacterCount: number
+  }>
   recentProjects: Array<{
     id: number
     title: string
     updatedAt: string
     documentCount: number
+    characterCount: number
   }>
   recentDocuments: Array<{
     id: number
@@ -42,6 +50,7 @@ export type DashboardStats = {
     count: number
     successCount: number
     failedCount: number
+    generatedCharacterCount: number
   }>
   activityTrend: Array<{ date: string; count: number }>
   projectBreakdown: Array<{
