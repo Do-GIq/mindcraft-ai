@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { EditorContent, useEditor, useEditorState } from '@tiptap/react'
 import type { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
-import { ArrowLeft, Bold, Check, Copy, Heading1, Heading2, History, Italic, List, ListOrdered, LoaderCircle, Plus, Quote, Redo2, RotateCcw, Save, Sparkles, Square, Undo2, X } from 'lucide-react'
+import { ArrowLeft, Bold, Heading1, Heading2, History, Italic, List, ListOrdered, Quote, Redo2, RotateCcw, Save, Undo2, X } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import {
   createDocumentVersion,
@@ -18,8 +18,8 @@ import {
   updateDocument,
 } from '../api/documentApi'
 import { useDocumentAutosave } from '../hooks/useDocumentAutosave'
-import { MAX_AI_PROMPT_LENGTH, useAiGeneration } from '../hooks/useAiGeneration'
-import { markdownToTiptapHtml } from '../lib/markdown'
+import DocumentAiAssistant from '../components/editor/DocumentAiAssistant'
+import { recordDocumentPageRender } from '../dev/streamBenchmark'
 import { useAuthStore } from '../stores/authStore'
 import type { Document } from '../types/document'
 
@@ -58,6 +58,8 @@ function EditorToolbar({ editor }: { editor: Editor | null }) {
 }
 
 function DocumentEditorPage() {
+  recordDocumentPageRender()
+
   const { projectId: projectIdParam, documentId: documentIdParam } = useParams()
   const projectId = Number(projectIdParam)
   const documentId = Number(documentIdParam)
@@ -65,8 +67,6 @@ function DocumentEditorPage() {
   const userId = useAuthStore((state) => state.user?.id)
   const queryClient = useQueryClient()
   const [title, setTitle] = useState('')
-  const [aiPrompt, setAiPrompt] = useState('')
-  const [insertError, setInsertError] = useState('')
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null)
   const [versionFeedback, setVersionFeedback] = useState('')
@@ -132,7 +132,6 @@ function DocumentEditorPage() {
       autosave.markChanged({ title: titleRef.current, content: currentEditor.getHTML() })
     },
   })
-  const aiGeneration = useAiGeneration()
   const versionPreviewEditor = useEditor({
     extensions: [StarterKit],
     content: '',
@@ -183,28 +182,6 @@ function DocumentEditorPage() {
     autosave.saveNow({ title: title.trim(), content: editor.getHTML() })
   }
 
-  function handleAiGeneration() {
-    const submittedPrompt = aiPrompt.trim()
-    if (!submittedPrompt || submittedPrompt.length > MAX_AI_PROMPT_LENGTH || aiGeneration.isGenerating) return
-
-    setAiPrompt('')
-    setInsertError('')
-    void aiGeneration.start(submittedPrompt, documentId)
-  }
-
-  function insertAiResult() {
-    if (!editor || !aiGeneration.output) return
-
-    try {
-      const html = markdownToTiptapHtml(aiGeneration.output)
-      if (!html.trim()) return
-      editor.chain().focus('end').insertContent(html).run()
-      setInsertError('')
-    } catch {
-      setInsertError('插入失败，请稍后重试')
-    }
-  }
-
   function saveCurrentVersion() {
     if (!editor || manualVersionMutation.isPending) return
     setVersionFeedback('')
@@ -251,57 +228,7 @@ function DocumentEditorPage() {
         <EditorContent editor={editor} className="tiptap-editor" />
       </div>
 
-      <section className="document-ai-panel" aria-label="AI 辅助创作">
-        <div className="document-ai-heading">
-          <div className="document-ai-title">
-            <span><Sparkles size={19} /></span>
-            <div><h2>AI 辅助创作</h2><p>描述需要补充的内容，生成后可插入当前文档末尾。</p></div>
-          </div>
-          <span className={`generation-status is-${aiGeneration.status}`}>
-            {aiGeneration.status === 'generating' ? '正在生成' : aiGeneration.status === 'completed' ? '生成完成' : aiGeneration.status === 'error' ? '生成失败' : '等待生成'}
-          </span>
-        </div>
-
-        <textarea
-          value={aiPrompt}
-          onChange={(event) => setAiPrompt(event.target.value)}
-          placeholder="例如：补充一段产品核心优势，使用三级标题和要点列表。"
-          maxLength={MAX_AI_PROMPT_LENGTH + 1}
-          disabled={aiGeneration.isGenerating}
-        />
-        <div className="document-ai-prompt-footer">
-          <span className={aiPrompt.length > MAX_AI_PROMPT_LENGTH ? 'is-over-limit' : ''}>{aiPrompt.length} / {MAX_AI_PROMPT_LENGTH}</span>
-          <div className="ai-generation-actions">
-            {aiGeneration.isGenerating && <button className="secondary-button" type="button" onClick={aiGeneration.stop}><Square size={14} fill="currentColor" />停止生成</button>}
-            <button className="primary-button" type="button" onClick={handleAiGeneration} disabled={aiGeneration.isGenerating || !aiPrompt.trim() || aiPrompt.trim().length > MAX_AI_PROMPT_LENGTH}>
-              {aiGeneration.isGenerating ? <><LoaderCircle className="spin-icon" size={17} />生成中...</> : <><Sparkles size={17} />开始生成</>}
-            </button>
-          </div>
-        </div>
-
-        <div className={`document-ai-result${aiGeneration.output ? ' has-content' : ''}`} aria-live="polite">
-          {aiGeneration.output || (aiGeneration.isGenerating ? '正在准备生成内容...' : 'AI 生成结果将在这里实时显示。')}
-        </div>
-
-        {(aiGeneration.output || aiGeneration.errorMessage || insertError) && (
-          <div className="document-ai-result-footer">
-            <div>
-              {aiGeneration.errorMessage && <p className="ai-error-message" role="alert">{aiGeneration.errorMessage}</p>}
-              {insertError && <p className="ai-error-message" role="alert">{insertError}</p>}
-            </div>
-            {aiGeneration.output && (
-              <div className="document-ai-result-actions">
-                <button className="secondary-button" type="button" onClick={aiGeneration.copy}>
-                  {aiGeneration.isCopied ? <Check size={16} /> : <Copy size={16} />}{aiGeneration.isCopied ? '已复制' : '复制'}
-                </button>
-                <button className="primary-button" type="button" onClick={insertAiResult} disabled={!editor}>
-                  <Plus size={17} />插入到文档
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </section>
+      <DocumentAiAssistant documentId={documentId} editor={editor} />
 
       {isHistoryOpen && (
         <div className="history-drawer-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsHistoryOpen(false) }}>

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { AiStreamError, generateAiContent } from '../api/aiApi'
+import {
+  recordStreamDelta,
+  recordStreamStateUpdate,
+  resetStreamBenchmark,
+} from '../dev/streamBenchmark'
 
 export type GenerationStatus = 'idle' | 'generating' | 'completed' | 'error'
 
@@ -16,10 +21,44 @@ export function useAiGeneration() {
   const [isCopied, setIsCopied] = useState(false)
   const abortControllerRef = useRef<AbortController | null>(null)
   const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingOutputRef = useRef('')
+  const animationFrameRef = useRef<number | null>(null)
+  const isMountedRef = useRef(true)
 
-  useEffect(() => () => {
-    abortControllerRef.current?.abort()
-    if (copyFeedbackTimerRef.current) clearTimeout(copyFeedbackTimerRef.current)
+  const flushPendingOutput = useCallback(() => {
+    animationFrameRef.current = null
+    const pendingOutput = pendingOutputRef.current
+    if (!pendingOutput || !isMountedRef.current) return
+
+    pendingOutputRef.current = ''
+    recordStreamStateUpdate()
+    setOutput((current) => current + pendingOutput)
+  }, [])
+
+  const flushPendingOutputNow = useCallback(() => {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+    flushPendingOutput()
+  }, [flushPendingOutput])
+
+  const enqueueOutput = useCallback((text: string) => {
+    pendingOutputRef.current += text
+    if (animationFrameRef.current === null) {
+      animationFrameRef.current = requestAnimationFrame(flushPendingOutput)
+    }
+  }, [flushPendingOutput])
+
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      abortControllerRef.current?.abort()
+      if (animationFrameRef.current !== null) cancelAnimationFrame(animationFrameRef.current)
+      pendingOutputRef.current = ''
+      if (copyFeedbackTimerRef.current) clearTimeout(copyFeedbackTimerRef.current)
+    }
   }, [])
 
   const start = useCallback(async (prompt: string, documentId?: number) => {
@@ -29,6 +68,8 @@ export function useAiGeneration() {
     }
 
     const abortController = new AbortController()
+    resetStreamBenchmark()
+    pendingOutputRef.current = ''
     abortControllerRef.current = abortController
     if (copyFeedbackTimerRef.current) {
       clearTimeout(copyFeedbackTimerRef.current)
@@ -44,13 +85,18 @@ export function useAiGeneration() {
         signal: abortController.signal,
         onDelta: (text) => {
           if (abortControllerRef.current === abortController) {
-            setOutput((current) => current + text)
+            recordStreamDelta(text)
+            enqueueOutput(text)
           }
         },
       }, documentId)
-      if (abortControllerRef.current === abortController) setStatus('completed')
+      if (abortControllerRef.current === abortController) {
+        flushPendingOutputNow()
+        setStatus('completed')
+      }
     } catch (error) {
       if (abortControllerRef.current !== abortController) return
+      flushPendingOutputNow()
       if (isAbortError(error)) {
         setStatus('idle')
       } else {
@@ -60,7 +106,7 @@ export function useAiGeneration() {
     } finally {
       if (abortControllerRef.current === abortController) abortControllerRef.current = null
     }
-  }, [])
+  }, [enqueueOutput, flushPendingOutputNow])
 
   const stop = useCallback(() => abortControllerRef.current?.abort(), [])
 
