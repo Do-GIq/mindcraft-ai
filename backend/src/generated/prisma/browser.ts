@@ -38,6 +38,16 @@ export type DocumentVersion = Prisma.DocumentVersionModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model Conversation
+ * 
+ */
+export type Conversation = Prisma.ConversationModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
+/**
  * Model AiGeneration
  * 
  */

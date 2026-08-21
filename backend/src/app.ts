@@ -8,6 +8,7 @@ import documentRouter, { singleDocumentRouter } from './modules/document/documen
 import aiRouter from './modules/ai/ai.route.js'
 import statsRouter from './modules/stats/stats.route.js'
 import userRouter from './modules/user/user.route.js'
+import conversationRouter from './modules/conversation/conversation.route.js'
 import { logger } from './lib/logger.js'
 import { errorLoggingHandler, globalErrorHandler, notFoundHandler } from './middleware/error.middleware.js'
 import { requestContext, requestLogger } from './middleware/request-context.middleware.js'
@@ -33,6 +34,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/ai', aiRouter)
 app.use('/api/stats', statsRouter)
 app.use('/api/users', userRouter)
+app.use('/api/conversations', conversationRouter)
 app.use(notFoundHandler)
 app.use(errorLoggingHandler)
 if (Sentry.isInitialized()) {

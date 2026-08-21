@@ -4,6 +4,10 @@ import { captureRequestException } from '../../lib/sentry.js'
 import { getAuthenticatedUserId } from '../auth/auth.middleware.js'
 import { getOwnedDocument } from '../document/document.service.js'
 import {
+  appendAssistantMessage,
+  appendUserMessageAndGetContext,
+} from '../conversation/conversation.service.js'
+import {
   AiConfigurationError,
   AiProviderError,
   createAiTextStream,
@@ -11,7 +15,7 @@ import {
   saveAiGenerationMetric,
 } from './ai.service.js'
 
-type GenerateBody = { prompt?: unknown; documentId?: unknown }
+type GenerateBody = { prompt?: unknown; documentId?: unknown; conversationId?: unknown }
 
 const MAX_PROMPT_LENGTH = 8_000
 
@@ -46,7 +50,32 @@ export async function generateController(
 
   const userId = getAuthenticatedUserId(req)
   let documentId: number | null = null
-  if (req.body?.documentId !== undefined) {
+  let conversationId: number | null = null
+  let modelInput: Parameters<typeof createAiTextStream>[0] = prompt
+
+  if (req.body?.conversationId !== undefined) {
+    const parsedConversationId = Number(req.body.conversationId)
+    if (!Number.isInteger(parsedConversationId) || parsedConversationId <= 0) {
+      res.status(400).json({ message: 'Invalid conversation id' })
+      return
+    }
+
+    try {
+      const context = await appendUserMessageAndGetContext(userId, parsedConversationId, prompt)
+      if (!context) {
+        res.status(404).json({ message: 'Conversation not found' })
+        return
+      }
+      conversationId = parsedConversationId
+      documentId = context.conversation.documentId
+      modelInput = context.messages
+    } catch (error) {
+      req.logger.error({ err: error, conversationId: parsedConversationId }, 'failed to prepare conversation context')
+      captureRequestException(req, error, { conversationId: parsedConversationId })
+      res.status(500).json({ message: 'Failed to prepare conversation' })
+      return
+    }
+  } else if (req.body?.documentId !== undefined) {
     const parsedDocumentId = Number(req.body.documentId)
     if (!Number.isInteger(parsedDocumentId) || parsedDocumentId <= 0) {
       res.status(400).json({ message: 'Invalid document id' })
@@ -72,6 +101,7 @@ export async function generateController(
   let outputChars = 0
   let firstTokenMs: number | null = null
   let metricRecorded = false
+  const assistantChunks: string[] = []
 
   const recordMetric = async (status: 'SUCCESS' | 'FAILED' | 'ABORTED') => {
     if (metricRecorded) return
@@ -106,7 +136,7 @@ export async function generateController(
   res.once('close', abortUpstream)
 
   try {
-    const chunks = await createAiTextStream(prompt, abortController.signal)
+    const chunks = await createAiTextStream(modelInput, abortController.signal)
 
     res.status(200)
     res.set({
@@ -124,10 +154,15 @@ export async function generateController(
       }
       if (firstTokenMs === null) firstTokenMs = Math.round(performance.now() - startedAt)
       outputChars += countTextCharacters(text)
+      if (conversationId !== null) assistantChunks.push(text)
       writeEvent(res, 'delta', { text })
     }
 
     if (!abortController.signal.aborted && !res.destroyed) {
+      if (conversationId !== null) {
+        const saved = await appendAssistantMessage(userId, conversationId, assistantChunks.join(''))
+        if (!saved) throw new Error('Conversation disappeared before assistant message was saved')
+      }
       writeEvent(res, 'done', {})
       streamFinished = true
       res.end()
