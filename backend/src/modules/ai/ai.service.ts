@@ -6,6 +6,11 @@ type ProviderChunk = {
   }>
 }
 
+export type AiModelMessage = {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 export class AiConfigurationError extends Error {
   constructor(message: string) {
     super(message)
@@ -126,7 +131,7 @@ async function* parseProviderStream(stream: ReadableStream<Uint8Array>) {
   }
 }
 
-export async function createAiTextStream(prompt: string, signal: AbortSignal) {
+export async function createAiTextStream(input: string | AiModelMessage[], signal: AbortSignal) {
   const { apiKey, baseUrl, model } = getAiConfig()
   const response = await fetch(getCompletionUrl(baseUrl), {
     method: 'POST',
@@ -137,7 +142,7 @@ export async function createAiTextStream(prompt: string, signal: AbortSignal) {
     body: JSON.stringify({
       model,
       stream: true,
-      messages: [{ role: 'user', content: prompt }],
+      messages: typeof input === 'string' ? [{ role: 'user', content: input }] : input,
     }),
     signal,
   })

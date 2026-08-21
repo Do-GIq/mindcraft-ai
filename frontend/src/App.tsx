@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Bot,
   Folder,
   Home,
   LogOut,
@@ -24,6 +25,7 @@ import './App.css'
 const navigationItems = [
   { label: '概览', icon: Home, to: '/' },
   { label: '我的项目', icon: Folder, to: '/projects' },
+  { label: 'AI 助手', icon: Bot, to: '/ai' },
   { label: '数据统计', icon: BarChart3, to: '/stats' },
   { label: '设置', icon: Settings, to: '/settings' },
 ]

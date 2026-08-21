@@ -61,7 +61,7 @@ export function useAiGeneration() {
     }
   }, [])
 
-  const start = useCallback(async (prompt: string, documentId?: number) => {
+  const start = useCallback(async (prompt: string, documentId?: number, conversationId?: number) => {
     const submittedPrompt = prompt.trim()
     if (!submittedPrompt || submittedPrompt.length > MAX_AI_PROMPT_LENGTH || abortControllerRef.current) {
       return
@@ -89,7 +89,7 @@ export function useAiGeneration() {
             enqueueOutput(text)
           }
         },
-      }, documentId)
+      }, documentId, conversationId)
       if (abortControllerRef.current === abortController) {
         flushPendingOutputNow()
         setStatus('completed')
