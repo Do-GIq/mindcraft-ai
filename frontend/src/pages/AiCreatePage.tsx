@@ -1,6 +1,34 @@
 import { Check, Copy, FilePenLine, LoaderCircle, Sparkles, Square } from 'lucide-react'
-import { useState } from 'react'
+import { Profiler, useLayoutEffect, useState } from 'react'
 import { MAX_AI_PROMPT_LENGTH, useAiGeneration } from '../hooks/useAiGeneration'
+import type { GenerationStatus } from '../hooks/useAiGeneration'
+import {
+  recordFinalUiCommit,
+  recordResultCommit,
+  recordResultRender,
+} from '../dev/streamBenchmark'
+
+function AiResultContent({ output, status }: { output: string; status: GenerationStatus }) {
+  recordResultRender()
+
+  useLayoutEffect(() => {
+    if (status === 'completed') recordFinalUiCommit()
+  }, [output, status])
+
+  return (
+    <div className={`ai-output-content${output ? ' has-content' : ''}`}>
+      {output ? output : status === 'generating' ? (
+        <div className="ai-stream-starting"><LoaderCircle className="spin-icon" size={22} />正在准备生成内容...</div>
+      ) : (
+        <div className="ai-empty-state">
+          <span><FilePenLine size={27} /></span>
+          <h3>开始一次内容创作</h3>
+          <p>描述你想创作的内容，AI 将在这里实时生成结果。</p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function AiCreatePage() {
   const [prompt, setPrompt] = useState('')
@@ -70,17 +98,9 @@ export default function AiCreatePage() {
               </span>
             </div>
           </div>
-          <div className={`ai-output-content${generation.output ? ' has-content' : ''}`}>
-            {generation.output ? generation.output : generation.isGenerating ? (
-              <div className="ai-stream-starting"><LoaderCircle className="spin-icon" size={22} />正在准备生成内容...</div>
-            ) : (
-              <div className="ai-empty-state">
-                <span><FilePenLine size={27} /></span>
-                <h3>开始一次内容创作</h3>
-                <p>描述你想创作的内容，AI 将在这里实时生成结果。</p>
-              </div>
-            )}
-          </div>
+          <Profiler id="ai-result" onRender={recordResultCommit}>
+            <AiResultContent output={generation.output} status={generation.status} />
+          </Profiler>
           {generation.errorMessage && <p className="ai-error-message" role="alert">{generation.errorMessage}</p>}
         </section>
       </div>
