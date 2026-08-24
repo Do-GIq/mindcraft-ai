@@ -251,6 +251,7 @@ export type ProjectWhereInput = {
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   documents?: Prisma.DocumentListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
+  knowledgeFiles?: Prisma.KnowledgeFileListRelationFilter
 }
 
 export type ProjectOrderByWithRelationInput = {
@@ -265,6 +266,7 @@ export type ProjectOrderByWithRelationInput = {
   user?: Prisma.UserOrderByWithRelationInput
   documents?: Prisma.DocumentOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
+  knowledgeFiles?: Prisma.KnowledgeFileOrderByRelationAggregateInput
   _relevance?: Prisma.ProjectOrderByRelevanceInput
 }
 
@@ -283,6 +285,7 @@ export type ProjectWhereUniqueInput = Prisma.AtLeast<{
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   documents?: Prisma.DocumentListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
+  knowledgeFiles?: Prisma.KnowledgeFileListRelationFilter
 }, "id">
 
 export type ProjectOrderByWithAggregationInput = {
@@ -325,6 +328,7 @@ export type ProjectCreateInput = {
   user?: Prisma.UserCreateNestedOneWithoutProjectsInput
   documents?: Prisma.DocumentCreateNestedManyWithoutProjectInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateInput = {
@@ -338,6 +342,7 @@ export type ProjectUncheckedCreateInput = {
   userId?: number | null
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutProjectInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUpdateInput = {
@@ -350,6 +355,7 @@ export type ProjectUpdateInput = {
   user?: Prisma.UserUpdateOneWithoutProjectsNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutProjectNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateInput = {
@@ -363,6 +369,7 @@ export type ProjectUncheckedUpdateInput = {
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutProjectNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateManyInput = {
@@ -551,6 +558,20 @@ export type ProjectUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.ProjectScalarWhereInput | Prisma.ProjectScalarWhereInput[]
 }
 
+export type ProjectCreateNestedOneWithoutKnowledgeFilesInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutKnowledgeFilesInput, Prisma.ProjectUncheckedCreateWithoutKnowledgeFilesInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutKnowledgeFilesInput
+  connect?: Prisma.ProjectWhereUniqueInput
+}
+
+export type ProjectUpdateOneRequiredWithoutKnowledgeFilesNestedInput = {
+  create?: Prisma.XOR<Prisma.ProjectCreateWithoutKnowledgeFilesInput, Prisma.ProjectUncheckedCreateWithoutKnowledgeFilesInput>
+  connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutKnowledgeFilesInput
+  upsert?: Prisma.ProjectUpsertWithoutKnowledgeFilesInput
+  connect?: Prisma.ProjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectUpdateToOneWithWhereWithoutKnowledgeFilesInput, Prisma.ProjectUpdateWithoutKnowledgeFilesInput>, Prisma.ProjectUncheckedUpdateWithoutKnowledgeFilesInput>
+}
+
 export type ProjectCreateNestedOneWithoutConversationsInput = {
   create?: Prisma.XOR<Prisma.ProjectCreateWithoutConversationsInput, Prisma.ProjectUncheckedCreateWithoutConversationsInput>
   connectOrCreate?: Prisma.ProjectCreateOrConnectWithoutConversationsInput
@@ -576,6 +597,7 @@ export type ProjectCreateWithoutDocumentsInput = {
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutProjectsInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutDocumentsInput = {
@@ -588,6 +610,7 @@ export type ProjectUncheckedCreateWithoutDocumentsInput = {
   updatedAt?: Date | string
   userId?: number | null
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutDocumentsInput = {
@@ -615,6 +638,7 @@ export type ProjectUpdateWithoutDocumentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutProjectsNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutDocumentsInput = {
@@ -627,6 +651,7 @@ export type ProjectUncheckedUpdateWithoutDocumentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateWithoutUserInput = {
@@ -638,6 +663,7 @@ export type ProjectCreateWithoutUserInput = {
   updatedAt?: Date | string
   documents?: Prisma.DocumentCreateNestedManyWithoutProjectInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutUserInput = {
@@ -650,6 +676,7 @@ export type ProjectUncheckedCreateWithoutUserInput = {
   updatedAt?: Date | string
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutProjectInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutUserInput = {
@@ -692,6 +719,72 @@ export type ProjectScalarWhereInput = {
   userId?: Prisma.IntNullableFilter<"Project"> | number | null
 }
 
+export type ProjectCreateWithoutKnowledgeFilesInput = {
+  title: string
+  type?: string
+  description?: string | null
+  progress?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user?: Prisma.UserCreateNestedOneWithoutProjectsInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutProjectInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectUncheckedCreateWithoutKnowledgeFilesInput = {
+  id?: number
+  title: string
+  type?: string
+  description?: string | null
+  progress?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  userId?: number | null
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutProjectInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutProjectInput
+}
+
+export type ProjectCreateOrConnectWithoutKnowledgeFilesInput = {
+  where: Prisma.ProjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutKnowledgeFilesInput, Prisma.ProjectUncheckedCreateWithoutKnowledgeFilesInput>
+}
+
+export type ProjectUpsertWithoutKnowledgeFilesInput = {
+  update: Prisma.XOR<Prisma.ProjectUpdateWithoutKnowledgeFilesInput, Prisma.ProjectUncheckedUpdateWithoutKnowledgeFilesInput>
+  create: Prisma.XOR<Prisma.ProjectCreateWithoutKnowledgeFilesInput, Prisma.ProjectUncheckedCreateWithoutKnowledgeFilesInput>
+  where?: Prisma.ProjectWhereInput
+}
+
+export type ProjectUpdateToOneWithWhereWithoutKnowledgeFilesInput = {
+  where?: Prisma.ProjectWhereInput
+  data: Prisma.XOR<Prisma.ProjectUpdateWithoutKnowledgeFilesInput, Prisma.ProjectUncheckedUpdateWithoutKnowledgeFilesInput>
+}
+
+export type ProjectUpdateWithoutKnowledgeFilesInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneWithoutProjectsNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutProjectNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutProjectNestedInput
+}
+
+export type ProjectUncheckedUpdateWithoutKnowledgeFilesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutProjectNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutProjectNestedInput
+}
+
 export type ProjectCreateWithoutConversationsInput = {
   title: string
   type?: string
@@ -701,6 +794,7 @@ export type ProjectCreateWithoutConversationsInput = {
   updatedAt?: Date | string
   user?: Prisma.UserCreateNestedOneWithoutProjectsInput
   documents?: Prisma.DocumentCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectUncheckedCreateWithoutConversationsInput = {
@@ -713,6 +807,7 @@ export type ProjectUncheckedCreateWithoutConversationsInput = {
   updatedAt?: Date | string
   userId?: number | null
   documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutProjectInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutProjectInput
 }
 
 export type ProjectCreateOrConnectWithoutConversationsInput = {
@@ -740,6 +835,7 @@ export type ProjectUpdateWithoutConversationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneWithoutProjectsNestedInput
   documents?: Prisma.DocumentUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutConversationsInput = {
@@ -752,6 +848,7 @@ export type ProjectUncheckedUpdateWithoutConversationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectCreateManyUserInput = {
@@ -773,6 +870,7 @@ export type ProjectUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.DocumentUpdateManyWithoutProjectNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateWithoutUserInput = {
@@ -785,6 +883,7 @@ export type ProjectUncheckedUpdateWithoutUserInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.DocumentUncheckedUpdateManyWithoutProjectNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutProjectNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutProjectNestedInput
 }
 
 export type ProjectUncheckedUpdateManyWithoutUserInput = {
@@ -805,11 +904,13 @@ export type ProjectUncheckedUpdateManyWithoutUserInput = {
 export type ProjectCountOutputType = {
   documents: number
   conversations: number
+  knowledgeFiles: number
 }
 
 export type ProjectCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documents?: boolean | ProjectCountOutputTypeCountDocumentsArgs
   conversations?: boolean | ProjectCountOutputTypeCountConversationsArgs
+  knowledgeFiles?: boolean | ProjectCountOutputTypeCountKnowledgeFilesArgs
 }
 
 /**
@@ -836,6 +937,13 @@ export type ProjectCountOutputTypeCountConversationsArgs<ExtArgs extends runtime
   where?: Prisma.ConversationWhereInput
 }
 
+/**
+ * ProjectCountOutputType without action
+ */
+export type ProjectCountOutputTypeCountKnowledgeFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeFileWhereInput
+}
+
 
 export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -849,6 +957,7 @@ export type ProjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   user?: boolean | Prisma.Project$userArgs<ExtArgs>
   documents?: boolean | Prisma.Project$documentsArgs<ExtArgs>
   conversations?: boolean | Prisma.Project$conversationsArgs<ExtArgs>
+  knowledgeFiles?: boolean | Prisma.Project$knowledgeFilesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["project"]>
 
@@ -870,6 +979,7 @@ export type ProjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   user?: boolean | Prisma.Project$userArgs<ExtArgs>
   documents?: boolean | Prisma.Project$documentsArgs<ExtArgs>
   conversations?: boolean | Prisma.Project$conversationsArgs<ExtArgs>
+  knowledgeFiles?: boolean | Prisma.Project$knowledgeFilesArgs<ExtArgs>
   _count?: boolean | Prisma.ProjectCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -879,6 +989,7 @@ export type $ProjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     user: Prisma.$UserPayload<ExtArgs> | null
     documents: Prisma.$DocumentPayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
+    knowledgeFiles: Prisma.$KnowledgeFilePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1232,6 +1343,7 @@ export interface Prisma__ProjectClient<T, Null = never, ExtArgs extends runtime.
   user<T extends Prisma.Project$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documents<T extends Prisma.Project$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.Project$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeFiles<T extends Prisma.Project$knowledgeFilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Project$knowledgeFilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1681,6 +1793,30 @@ export type Project$conversationsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.ConversationScalarFieldEnum | Prisma.ConversationScalarFieldEnum[]
+}
+
+/**
+ * Project.knowledgeFiles
+ */
+export type Project$knowledgeFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeFile
+   */
+  select?: Prisma.KnowledgeFileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeFile
+   */
+  omit?: Prisma.KnowledgeFileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeFileInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeFileWhereInput
+  orderBy?: Prisma.KnowledgeFileOrderByWithRelationInput | Prisma.KnowledgeFileOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeFileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeFileScalarFieldEnum | Prisma.KnowledgeFileScalarFieldEnum[]
 }
 
 /**

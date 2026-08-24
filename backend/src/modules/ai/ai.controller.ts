@@ -14,6 +14,7 @@ import {
   getAiLogMetadata,
   saveAiGenerationMetric,
 } from './ai.service.js'
+import { retrieveProjectKnowledge } from '../knowledge/knowledge.service.js'
 
 type GenerateBody = { prompt?: unknown; documentId?: unknown; conversationId?: unknown }
 
@@ -68,7 +69,28 @@ export async function generateController(
       }
       conversationId = parsedConversationId
       documentId = context.conversation.documentId
-      modelInput = context.messages
+      if (context.conversation.projectId !== null) {
+        try {
+          const knowledge = await retrieveProjectKnowledge(userId, context.conversation.projectId, prompt)
+          modelInput = knowledge.length > 0
+            ? [
+                {
+                  role: 'system',
+                  content: `你是 MindCraft AI 助手。请优先依据以下项目资料回答；资料不足时应明确说明。\n\n以下是项目资料：\n${knowledge.join('\n\n---\n\n')}`,
+                },
+                ...context.messages,
+              ]
+            : context.messages
+        } catch (error) {
+          req.logger.warn(
+            { err: error, conversationId: parsedConversationId, projectId: context.conversation.projectId },
+            'knowledge retrieval failed; continuing without RAG context',
+          )
+          modelInput = context.messages
+        }
+      } else {
+        modelInput = context.messages
+      }
     } catch (error) {
       req.logger.error({ err: error, conversationId: parsedConversationId }, 'failed to prepare conversation context')
       captureRequestException(req, error, { conversationId: parsedConversationId })

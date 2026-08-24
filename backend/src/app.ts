@@ -9,10 +9,12 @@ import aiRouter from './modules/ai/ai.route.js'
 import statsRouter from './modules/stats/stats.route.js'
 import userRouter from './modules/user/user.route.js'
 import conversationRouter from './modules/conversation/conversation.route.js'
+import knowledgeRouter from './modules/knowledge/knowledge.route.js'
 import { logger } from './lib/logger.js'
 import { errorLoggingHandler, globalErrorHandler, notFoundHandler } from './middleware/error.middleware.js'
 import { requestContext, requestLogger } from './middleware/request-context.middleware.js'
 import { shouldCaptureExpressError } from './lib/sentry.js'
+import { ensureKnowledgeCollection } from './modules/knowledge/qdrant.service.js'
 
 const app = express()
 
@@ -28,6 +30,7 @@ app.get('/api/health', (req, res) => {
 })
 
 app.use('/api/projects/:projectId/documents', documentRouter)
+app.use('/api/projects/:projectId/knowledge', knowledgeRouter)
 app.use('/api/documents', singleDocumentRouter)
 app.use('/api/projects', projectRouter)
 app.use('/api/auth', authRouter)
@@ -42,6 +45,15 @@ if (Sentry.isInitialized()) {
 }
 app.use(globalErrorHandler)
 
-app.listen(3000, () => {
-  logger.info({ port: 3000 }, 'server started')
+async function startServer() {
+  const collectionState = await ensureKnowledgeCollection()
+  logger.info({ collection: 'mindcraft_knowledge', collectionState }, 'Qdrant knowledge collection ready')
+  app.listen(3000, () => {
+    logger.info({ port: 3000 }, 'server started')
+  })
+}
+
+startServer().catch((error: unknown) => {
+  logger.error({ err: error }, 'server startup failed')
+  process.exitCode = 1
 })

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Bot, Check, Copy, LoaderCircle, MessageSquarePlus, Plus, Send, Trash2, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Bot, Check, Copy, FileText, LoaderCircle, MessageSquarePlus, Plus, Send, Trash2, Upload, X } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
 import {
   conversationQueryKey,
   conversationsQueryKey,
@@ -11,6 +11,7 @@ import {
 } from '../api/conversationApi'
 import { documentsQueryKey, fetchDocuments } from '../api/documentApi'
 import { fetchProjects, projectsQueryKey } from '../api/projectApi'
+import { fetchKnowledgeFiles, knowledgeFilesQueryKey, uploadKnowledgeFile } from '../api/knowledgeApi'
 import { MAX_AI_PROMPT_LENGTH, useAiGeneration } from '../hooks/useAiGeneration'
 import { markdownToTiptapHtml } from '../lib/markdown'
 import { useAuthStore } from '../stores/authStore'
@@ -33,6 +34,9 @@ export default function AiCreatePage() {
   const [projectId, setProjectId] = useState('')
   const [documentId, setDocumentId] = useState('')
   const [copiedMessageId, setCopiedMessageId] = useState<number | 'stream' | null>(null)
+  const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false)
+  const [knowledgeStatus, setKnowledgeStatus] = useState('')
+  const knowledgeInputRef = useRef<HTMLInputElement>(null)
 
   const conversationsQuery = useQuery({ queryKey: conversationsQueryKey(userId), queryFn: fetchConversations, enabled: userId !== undefined })
   const activeSelectedId = selectedId ?? conversationsQuery.data?.[0]?.id ?? null
@@ -105,6 +109,20 @@ export default function AiCreatePage() {
   }
 
   const activeConversation = conversationQuery.data
+  const activeProjectId = activeConversation?.projectId ?? 0
+  const knowledgeQuery = useQuery({
+    queryKey: knowledgeFilesQueryKey(userId, activeProjectId),
+    queryFn: () => fetchKnowledgeFiles(activeProjectId),
+    enabled: userId !== undefined && activeProjectId > 0 && isKnowledgeOpen,
+  })
+  const knowledgeMutation = useMutation({
+    mutationFn: (file: File) => uploadKnowledgeFile(activeProjectId, file),
+    onSuccess: async (file) => {
+      setKnowledgeStatus(`“${file.filename}”已上传，共 ${file.chunkCount} 个片段`)
+      await queryClient.invalidateQueries({ queryKey: knowledgeFilesQueryKey(userId, activeProjectId) })
+    },
+    onError: (error) => setKnowledgeStatus(error instanceof Error ? error.message : '知识文件上传失败'),
+  })
 
   return (
     <section className="conversation-page">
@@ -142,8 +160,31 @@ export default function AiCreatePage() {
           <>
             <header className="conversation-header">
               <div><h2>{activeConversation?.title}</h2><p>{activeConversation?.document ? `文档：${activeConversation.document.title}` : activeConversation?.project ? `项目：${activeConversation.project.title}` : '普通 AI 会话'}</p></div>
-              <span>{activeConversation?.messages.length ?? 0} 条历史消息</span>
+              <div className="conversation-header-actions">
+                {activeProjectId > 0 && <button className="secondary-button" type="button" onClick={() => setIsKnowledgeOpen((value) => !value)}><FileText size={16} />知识库</button>}
+                <span>{activeConversation?.messages.length ?? 0} 条历史消息</span>
+              </div>
             </header>
+
+            {isKnowledgeOpen && activeProjectId > 0 && (
+              <section className="conversation-knowledge" aria-label="项目知识库">
+                <div>
+                  <strong>项目知识库</strong>
+                  <span>{knowledgeQuery.data?.length ?? 0} 个文件 · 支持 Markdown / TXT</span>
+                </div>
+                <div className="conversation-knowledge-files">
+                  {knowledgeQuery.isPending && <span>正在加载...</span>}
+                  {knowledgeQuery.isError && <span className="is-error">知识库加载失败</span>}
+                  {knowledgeQuery.data?.map((file) => <span key={file.id}><FileText size={14} />{file.filename}<small>{file._count.chunks} 个片段</small></span>)}
+                  {knowledgeQuery.data?.length === 0 && <span>还没有知识文件</span>}
+                </div>
+                <div className="conversation-knowledge-upload">
+                  <input ref={knowledgeInputRef} type="file" accept=".md,.markdown,.txt,text/plain,text/markdown" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) { setKnowledgeStatus(''); knowledgeMutation.mutate(file) } event.currentTarget.value = '' }} />
+                  {knowledgeStatus && <span className={knowledgeMutation.isError ? 'is-error' : ''}>{knowledgeStatus}</span>}
+                  <button className="secondary-button" type="button" onClick={() => knowledgeInputRef.current?.click()} disabled={knowledgeMutation.isPending}><Upload size={15} />{knowledgeMutation.isPending ? '处理中...' : '上传资料'}</button>
+                </div>
+              </section>
+            )}
 
             <div className="conversation-messages" aria-live="polite">
               {activeConversation?.messages.length === 0 && !pendingUserMessage && <div className="conversation-messages-empty"><Bot size={26} /><h3>描述你的创作需求</h3><p>AI 会基于这段会话的历史消息持续回答。</p></div>}
