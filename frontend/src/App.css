@@ -416,6 +416,18 @@ button, input, textarea { font: inherit; }
 .conversation-header { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px 22px; border-bottom: 1px solid var(--border); }
 .conversation-header h2 { margin: 0 0 5px; color: var(--heading); font-size: 19px; }
 .conversation-header p, .conversation-header > span { margin: 0; color: var(--muted); font-size: 12px; }
+.conversation-header-actions { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; }
+.conversation-header-actions .secondary-button { min-height: 34px; padding: 0 11px; }
+.conversation-knowledge { display: grid; grid-template-columns: minmax(150px, .7fr) minmax(240px, 1.5fr) auto; align-items: center; gap: 16px; padding: 12px 22px; background: #f8fafd; border-bottom: 1px solid var(--border); }
+.conversation-knowledge > div:first-child { display: grid; gap: 3px; }
+.conversation-knowledge strong { color: var(--heading); font-size: 13px; }
+.conversation-knowledge span { color: var(--muted); font-size: 11px; }
+.conversation-knowledge .is-error { color: #b42318; }
+.conversation-knowledge-files { min-width: 0; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+.conversation-knowledge-files > span { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; padding: 6px 8px; color: var(--body); background: #fff; border: 1px solid var(--border); border-radius: 7px; }
+.conversation-knowledge-files small { color: var(--muted); }
+.conversation-knowledge-upload { display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
+.conversation-knowledge-upload .secondary-button { min-height: 34px; padding: 0 11px; white-space: nowrap; }
 .conversation-messages { flex: 1; min-height: 0; padding: 22px max(22px, 6%); overflow-y: auto; background: #fbfcfe; }
 .conversation-message { position: relative; max-width: 82%; margin-bottom: 18px; padding: 15px 17px; background: #fff; border: 1px solid var(--border); border-radius: 11px; }
 .conversation-message.is-user { margin-left: auto; background: #edf4ff; border-color: #d8e6fb; }
@@ -508,6 +520,8 @@ button, input, textarea { font: inherit; }
   .conversation-page { height: auto; min-height: calc(100vh - 48px); grid-template-columns: 1fr; overflow: visible; }
   .conversation-sidebar { max-height: 260px; border-right: 0; border-bottom: 1px solid var(--border); }
   .conversation-workspace { min-height: 620px; }
+  .conversation-knowledge { grid-template-columns: 1fr; }
+  .conversation-knowledge-upload { justify-content: space-between; }
   .conversation-message { max-width: 94%; }
   .document-ai-heading, .document-ai-prompt-footer, .document-ai-result-footer { align-items: stretch; flex-direction: column; }
   .document-ai-result-actions { width: 100%; margin-left: 0; }

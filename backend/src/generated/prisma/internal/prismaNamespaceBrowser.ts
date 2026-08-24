@@ -55,6 +55,8 @@ export const ModelName = {
   Document: 'Document',
   DocumentVersion: 'DocumentVersion',
   User: 'User',
+  KnowledgeFile: 'KnowledgeFile',
+  KnowledgeChunk: 'KnowledgeChunk',
   Conversation: 'Conversation',
   Message: 'Message',
   AiGeneration: 'AiGeneration'
@@ -124,6 +126,31 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const KnowledgeFileScalarFieldEnum = {
+  id: 'id',
+  projectId: 'projectId',
+  userId: 'userId',
+  filename: 'filename',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KnowledgeFileScalarFieldEnum = (typeof KnowledgeFileScalarFieldEnum)[keyof typeof KnowledgeFileScalarFieldEnum]
+
+
+export const KnowledgeChunkScalarFieldEnum = {
+  id: 'id',
+  knowledgeFileId: 'knowledgeFileId',
+  content: 'content',
+  chunkIndex: 'chunkIndex',
+  vectorId: 'vectorId',
+  createdAt: 'createdAt'
+} as const
+
+export type KnowledgeChunkScalarFieldEnum = (typeof KnowledgeChunkScalarFieldEnum)[keyof typeof KnowledgeChunkScalarFieldEnum]
 
 
 export const ConversationScalarFieldEnum = {
@@ -215,6 +242,22 @@ export const UserOrderByRelevanceFieldEnum = {
 } as const
 
 export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
+export const KnowledgeFileOrderByRelevanceFieldEnum = {
+  filename: 'filename',
+  content: 'content'
+} as const
+
+export type KnowledgeFileOrderByRelevanceFieldEnum = (typeof KnowledgeFileOrderByRelevanceFieldEnum)[keyof typeof KnowledgeFileOrderByRelevanceFieldEnum]
+
+
+export const KnowledgeChunkOrderByRelevanceFieldEnum = {
+  content: 'content',
+  vectorId: 'vectorId'
+} as const
+
+export type KnowledgeChunkOrderByRelevanceFieldEnum = (typeof KnowledgeChunkOrderByRelevanceFieldEnum)[keyof typeof KnowledgeChunkOrderByRelevanceFieldEnum]
 
 
 export const ConversationOrderByRelevanceFieldEnum = {

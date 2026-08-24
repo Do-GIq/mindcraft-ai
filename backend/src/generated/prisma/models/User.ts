@@ -227,6 +227,7 @@ export type UserWhereInput = {
   projects?: Prisma.ProjectListRelationFilter
   aiGenerations?: Prisma.AiGenerationListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
+  knowledgeFiles?: Prisma.KnowledgeFileListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -239,6 +240,7 @@ export type UserOrderByWithRelationInput = {
   projects?: Prisma.ProjectOrderByRelationAggregateInput
   aiGenerations?: Prisma.AiGenerationOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
+  knowledgeFiles?: Prisma.KnowledgeFileOrderByRelationAggregateInput
   _relevance?: Prisma.UserOrderByRelevanceInput
 }
 
@@ -255,6 +257,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   projects?: Prisma.ProjectListRelationFilter
   aiGenerations?: Prisma.AiGenerationListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
+  knowledgeFiles?: Prisma.KnowledgeFileListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -292,6 +295,7 @@ export type UserCreateInput = {
   projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
   aiGenerations?: Prisma.AiGenerationCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -304,6 +308,7 @@ export type UserUncheckedCreateInput = {
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
   aiGenerations?: Prisma.AiGenerationUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -315,6 +320,7 @@ export type UserUpdateInput = {
   projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
   aiGenerations?: Prisma.AiGenerationUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -327,6 +333,7 @@ export type UserUncheckedUpdateInput = {
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
   aiGenerations?: Prisma.AiGenerationUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -422,6 +429,20 @@ export type UserUpdateOneWithoutProjectsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProjectsInput, Prisma.UserUpdateWithoutProjectsInput>, Prisma.UserUncheckedUpdateWithoutProjectsInput>
 }
 
+export type UserCreateNestedOneWithoutKnowledgeFilesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutKnowledgeFilesInput, Prisma.UserUncheckedCreateWithoutKnowledgeFilesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutKnowledgeFilesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutKnowledgeFilesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutKnowledgeFilesInput, Prisma.UserUncheckedCreateWithoutKnowledgeFilesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutKnowledgeFilesInput
+  upsert?: Prisma.UserUpsertWithoutKnowledgeFilesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutKnowledgeFilesInput, Prisma.UserUpdateWithoutKnowledgeFilesInput>, Prisma.UserUncheckedUpdateWithoutKnowledgeFilesInput>
+}
+
 export type UserCreateNestedOneWithoutConversationsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutConversationsInput, Prisma.UserUncheckedCreateWithoutConversationsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationsInput
@@ -458,6 +479,7 @@ export type UserCreateWithoutProjectsInput = {
   updatedAt?: Date | string
   aiGenerations?: Prisma.AiGenerationCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProjectsInput = {
@@ -469,6 +491,7 @@ export type UserUncheckedCreateWithoutProjectsInput = {
   updatedAt?: Date | string
   aiGenerations?: Prisma.AiGenerationUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProjectsInput = {
@@ -495,6 +518,7 @@ export type UserUpdateWithoutProjectsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   aiGenerations?: Prisma.AiGenerationUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProjectsInput = {
@@ -504,6 +528,69 @@ export type UserUncheckedUpdateWithoutProjectsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiGenerations?: Prisma.AiGenerationUncheckedUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutKnowledgeFilesInput = {
+  email: string
+  passwordHash: string
+  name?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
+  aiGenerations?: Prisma.AiGenerationCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutKnowledgeFilesInput = {
+  id?: number
+  email: string
+  passwordHash: string
+  name?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
+  aiGenerations?: Prisma.AiGenerationUncheckedCreateNestedManyWithoutUserInput
+  conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutKnowledgeFilesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutKnowledgeFilesInput, Prisma.UserUncheckedCreateWithoutKnowledgeFilesInput>
+}
+
+export type UserUpsertWithoutKnowledgeFilesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutKnowledgeFilesInput, Prisma.UserUncheckedUpdateWithoutKnowledgeFilesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutKnowledgeFilesInput, Prisma.UserUncheckedCreateWithoutKnowledgeFilesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutKnowledgeFilesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutKnowledgeFilesInput, Prisma.UserUncheckedUpdateWithoutKnowledgeFilesInput>
+}
+
+export type UserUpdateWithoutKnowledgeFilesInput = {
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
+  aiGenerations?: Prisma.AiGenerationUpdateManyWithoutUserNestedInput
+  conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutKnowledgeFilesInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
   aiGenerations?: Prisma.AiGenerationUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
 }
@@ -516,6 +603,7 @@ export type UserCreateWithoutConversationsInput = {
   updatedAt?: Date | string
   projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
   aiGenerations?: Prisma.AiGenerationCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsInput = {
@@ -527,6 +615,7 @@ export type UserUncheckedCreateWithoutConversationsInput = {
   updatedAt?: Date | string
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
   aiGenerations?: Prisma.AiGenerationUncheckedCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsInput = {
@@ -553,6 +642,7 @@ export type UserUpdateWithoutConversationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
   aiGenerations?: Prisma.AiGenerationUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsInput = {
@@ -564,6 +654,7 @@ export type UserUncheckedUpdateWithoutConversationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
   aiGenerations?: Prisma.AiGenerationUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiGenerationsInput = {
@@ -574,6 +665,7 @@ export type UserCreateWithoutAiGenerationsInput = {
   updatedAt?: Date | string
   projects?: Prisma.ProjectCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiGenerationsInput = {
@@ -585,6 +677,7 @@ export type UserUncheckedCreateWithoutAiGenerationsInput = {
   updatedAt?: Date | string
   projects?: Prisma.ProjectUncheckedCreateNestedManyWithoutUserInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutUserInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiGenerationsInput = {
@@ -611,6 +704,7 @@ export type UserUpdateWithoutAiGenerationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   projects?: Prisma.ProjectUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiGenerationsInput = {
@@ -622,6 +716,7 @@ export type UserUncheckedUpdateWithoutAiGenerationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   projects?: Prisma.ProjectUncheckedUpdateManyWithoutUserNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutUserNestedInput
+  knowledgeFiles?: Prisma.KnowledgeFileUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -633,12 +728,14 @@ export type UserCountOutputType = {
   projects: number
   aiGenerations: number
   conversations: number
+  knowledgeFiles: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   projects?: boolean | UserCountOutputTypeCountProjectsArgs
   aiGenerations?: boolean | UserCountOutputTypeCountAiGenerationsArgs
   conversations?: boolean | UserCountOutputTypeCountConversationsArgs
+  knowledgeFiles?: boolean | UserCountOutputTypeCountKnowledgeFilesArgs
 }
 
 /**
@@ -672,6 +769,13 @@ export type UserCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.ConversationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountKnowledgeFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KnowledgeFileWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -683,6 +787,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   projects?: boolean | Prisma.User$projectsArgs<ExtArgs>
   aiGenerations?: boolean | Prisma.User$aiGenerationsArgs<ExtArgs>
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
+  knowledgeFiles?: boolean | Prisma.User$knowledgeFilesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -702,6 +807,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   projects?: boolean | Prisma.User$projectsArgs<ExtArgs>
   aiGenerations?: boolean | Prisma.User$aiGenerationsArgs<ExtArgs>
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
+  knowledgeFiles?: boolean | Prisma.User$knowledgeFilesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -711,6 +817,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     projects: Prisma.$ProjectPayload<ExtArgs>[]
     aiGenerations: Prisma.$AiGenerationPayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
+    knowledgeFiles: Prisma.$KnowledgeFilePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1062,6 +1169,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   projects<T extends Prisma.User$projectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$projectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiGenerations<T extends Prisma.User$aiGenerationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiGenerationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiGenerationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.User$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  knowledgeFiles<T extends Prisma.User$knowledgeFilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$knowledgeFilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KnowledgeFilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1514,6 +1622,30 @@ export type User$conversationsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ConversationScalarFieldEnum | Prisma.ConversationScalarFieldEnum[]
+}
+
+/**
+ * User.knowledgeFiles
+ */
+export type User$knowledgeFilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KnowledgeFile
+   */
+  select?: Prisma.KnowledgeFileSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KnowledgeFile
+   */
+  omit?: Prisma.KnowledgeFileOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KnowledgeFileInclude<ExtArgs> | null
+  where?: Prisma.KnowledgeFileWhereInput
+  orderBy?: Prisma.KnowledgeFileOrderByWithRelationInput | Prisma.KnowledgeFileOrderByWithRelationInput[]
+  cursor?: Prisma.KnowledgeFileWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KnowledgeFileScalarFieldEnum | Prisma.KnowledgeFileScalarFieldEnum[]
 }
 
 /**

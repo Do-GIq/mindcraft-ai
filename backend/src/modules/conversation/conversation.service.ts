@@ -77,7 +77,7 @@ export async function appendUserMessageAndGetContext(
   return prisma.$transaction(async (tx) => {
     const conversation = await tx.conversation.findFirst({
       where: { id: conversationId, userId },
-      select: { id: true, documentId: true },
+      select: { id: true, documentId: true, projectId: true },
     })
     if (!conversation) return null
 

@@ -62,6 +62,16 @@ export type DocumentVersion = Prisma.DocumentVersionModel
  */
 export type User = Prisma.UserModel
 /**
+ * Model KnowledgeFile
+ * 
+ */
+export type KnowledgeFile = Prisma.KnowledgeFileModel
+/**
+ * Model KnowledgeChunk
+ * 
+ */
+export type KnowledgeChunk = Prisma.KnowledgeChunkModel
+/**
  * Model Conversation
  * 
  */

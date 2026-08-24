@@ -7,7 +7,7 @@ type ProviderChunk = {
 }
 
 export type AiModelMessage = {
-  role: 'user' | 'assistant'
+  role: 'system' | 'user' | 'assistant'
   content: string
 }
 
