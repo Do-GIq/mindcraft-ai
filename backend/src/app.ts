@@ -15,13 +15,23 @@ import { errorLoggingHandler, globalErrorHandler, notFoundHandler } from './midd
 import { requestContext, requestLogger } from './middleware/request-context.middleware.js'
 import { shouldCaptureExpressError } from './lib/sentry.js'
 import { ensureKnowledgeCollection } from './modules/knowledge/qdrant.service.js'
+import { getCorsOrigins, validateEnvironment } from './config/environment.js'
 
 const app = express()
+const corsOrigins = getCorsOrigins()
+
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1)
 
 app.use(requestContext)
 app.use(requestLogger)
-app.use(cors())
-app.use(express.json())
+app.use(cors({
+  origin(origin, callback) {
+    callback(null, !origin || corsOrigins.includes(origin))
+  },
+}))
+app.use('/api/documents', express.json({ limit: '128kb' }))
+app.use(express.json({ limit: '32kb' }))
+app.use(express.urlencoded({ extended: false, limit: '16kb' }))
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -46,6 +56,7 @@ if (Sentry.isInitialized()) {
 app.use(globalErrorHandler)
 
 async function startServer() {
+  validateEnvironment()
   const collectionState = await ensureKnowledgeCollection()
   logger.info({ collection: 'mindcraft_knowledge', collectionState }, 'Qdrant knowledge collection ready')
   app.listen(3000, () => {

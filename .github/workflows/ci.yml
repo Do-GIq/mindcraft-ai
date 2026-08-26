@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: mysql://ci:ci@127.0.0.1:3306/mindcraft_ci
+      JWT_SECRET: ci-only-jwt-secret-not-used-outside-tests
+      AI_API_KEY: ci-dummy-ai-key
+      AI_BASE_URL: https://ai.invalid/v1
+      AI_MODEL: ci-dummy-model
+      AI_EMBEDDING_MODEL: ci-dummy-embedding-model
+      QDRANT_URL: https://qdrant.invalid
+      QDRANT_API_KEY: ci-dummy-qdrant-key
+      FRONTEND_URL: http://localhost:5173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm test
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npm run lint
+      - run: npm run build
