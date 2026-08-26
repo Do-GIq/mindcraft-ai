@@ -98,6 +98,39 @@ export async function appendUserMessageAndGetContext(
   })
 }
 
+export async function getRetryConversationContext(userId: number, conversationId: number) {
+  const conversation = await prisma.conversation.findFirst({
+    where: { id: conversationId, userId },
+    select: {
+      id: true,
+      documentId: true,
+      projectId: true,
+      messages: {
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: 20,
+        select: { role: true, content: true },
+      },
+    },
+  })
+  if (!conversation) return null
+
+  const latestMessage = conversation.messages[0]
+  const messages: AiModelMessage[] = conversation.messages.slice().reverse().map((message) => ({
+    role: message.role === 'ASSISTANT' ? 'assistant' : 'user',
+    content: message.content,
+  }))
+
+  return {
+    conversation: {
+      id: conversation.id,
+      documentId: conversation.documentId,
+      projectId: conversation.projectId,
+    },
+    messages,
+    prompt: latestMessage?.role === 'USER' ? latestMessage.content : null,
+  }
+}
+
 export async function appendAssistantMessage(
   userId: number,
   conversationId: number,

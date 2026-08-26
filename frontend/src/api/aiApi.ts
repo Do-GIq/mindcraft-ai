@@ -78,6 +78,7 @@ export async function generateAiContent(
   { signal, onDelta, onSources }: StreamCallbacks,
   documentId?: number,
   conversationId?: number,
+  retry = false,
 ) {
   const response = await authenticatedFetch('/api/ai/generate', {
     method: 'POST',
@@ -86,6 +87,7 @@ export async function generateAiContent(
       prompt,
       ...(documentId ? { documentId } : {}),
       ...(conversationId ? { conversationId } : {}),
+      ...(retry ? { retry: true } : {}),
     }),
     signal,
   })

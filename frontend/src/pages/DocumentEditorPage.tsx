@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { EditorContent, useEditor, useEditorState } from '@tiptap/react'
 import type { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
+import { TableKit } from '@tiptap/extension-table'
 import { ArrowLeft, Bold, Heading1, Heading2, History, Italic, List, ListOrdered, Quote, Redo2, RotateCcw, Save, Undo2, X } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import {
@@ -125,7 +126,7 @@ function DocumentEditorPage() {
     },
   })
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, TableKit],
     content: '',
     immediatelyRender: false,
     onUpdate: ({ editor: currentEditor }) => {
@@ -133,7 +134,7 @@ function DocumentEditorPage() {
     },
   })
   const versionPreviewEditor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, TableKit],
     content: '',
     editable: false,
     immediatelyRender: false,
@@ -223,12 +224,16 @@ function DocumentEditorPage() {
         </div>
       </header>
 
-      <div className="editor-shell">
-        <EditorToolbar editor={editor} />
-        <EditorContent editor={editor} className="tiptap-editor" />
-      </div>
+      <div className="document-editor-workspace">
+        <div className="editor-main-column">
+          <div className="editor-shell">
+            <EditorToolbar editor={editor} />
+            <EditorContent editor={editor} className="tiptap-editor" />
+          </div>
+        </div>
 
-      <DocumentAiAssistant documentId={documentId} editor={editor} />
+        <DocumentAiAssistant projectId={projectId} documentId={documentId} editor={editor} />
+      </div>
 
       {isHistoryOpen && (
         <div className="history-drawer-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsHistoryOpen(false) }}>
