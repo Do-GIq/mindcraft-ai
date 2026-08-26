@@ -22,8 +22,13 @@ type CollectionResponse = {
   }
 }
 
+export type KnowledgeQueryPoint = {
+  payload: Record<string, unknown>
+  score: number | null
+}
+
 type QueryResponse = {
-  result?: { points?: Array<{ payload?: Record<string, unknown> }> }
+  result?: { points?: Array<{ payload?: Record<string, unknown>; score?: unknown }> }
 }
 
 let collectionPromise: Promise<'created' | 'existing'> | null = null
@@ -40,6 +45,18 @@ function qdrantHeaders(apiKey?: string) {
   return headers
 }
 
+async function validateKnowledgeCollection(response: Response) {
+  const collection = await response.json() as CollectionResponse
+  const vectors = collection.result?.config?.params?.vectors
+  const vectorSize = typeof vectors?.size === 'number' ? vectors.size : null
+  const distance = typeof vectors?.distance === 'string' ? vectors.distance : null
+  if (vectorSize !== KNOWLEDGE_VECTOR_SIZE || distance?.toLowerCase() !== KNOWLEDGE_DISTANCE.toLowerCase()) {
+    throw new Error(
+      `Qdrant collection configuration mismatch (expected ${KNOWLEDGE_VECTOR_SIZE}/${KNOWLEDGE_DISTANCE}, received ${vectorSize ?? 'unknown'}/${distance ?? 'unknown'})`,
+    )
+  }
+}
+
 export async function ensureKnowledgeCollection() {
   if (collectionPromise) return collectionPromise
 
@@ -47,7 +64,10 @@ export async function ensureKnowledgeCollection() {
     const { url, apiKey } = getQdrantConfig()
     const headers = qdrantHeaders(apiKey)
     const current = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}`, { headers })
-    if (current.ok) return 'existing' as const
+    if (current.ok) {
+      await validateKnowledgeCollection(current)
+      return 'existing' as const
+    }
     if (current.status !== 404) throw new Error(`Qdrant collection check failed (${current.status})`)
 
     const created = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}`, {
@@ -60,7 +80,13 @@ export async function ensureKnowledgeCollection() {
     if (!created.ok && created.status !== 409) {
       throw new Error(`Qdrant collection creation failed (${created.status})`)
     }
-    return created.status === 409 ? 'existing' as const : 'created' as const
+    if (created.status === 409) {
+      const existing = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}`, { headers })
+      if (!existing.ok) throw new Error(`Qdrant collection check failed (${existing.status})`)
+      await validateKnowledgeCollection(existing)
+      return 'existing' as const
+    }
+    return 'created' as const
   })().catch((error) => {
     collectionPromise = null
     throw error
@@ -109,13 +135,15 @@ export async function upsertKnowledgePoints(points: KnowledgeVectorPoint[]) {
 }
 
 export async function deleteKnowledgePoints(vectorIds: string[]) {
-  if (vectorIds.length === 0) return
+  const validVectorIds = vectorIds.filter((vectorId) => vectorId.trim().length > 0)
+  if (validVectorIds.length === 0) return
   const { url, apiKey } = getQdrantConfig()
-  await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}/points/delete?wait=true`, {
+  const response = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}/points/delete?wait=true`, {
     method: 'POST',
     headers: qdrantHeaders(apiKey),
-    body: JSON.stringify({ points: vectorIds }),
+    body: JSON.stringify({ points: validVectorIds }),
   })
+  if (!response.ok) throw new Error(`Qdrant point deletion failed (${response.status})`)
 }
 
 export async function queryKnowledgePoints(projectId: number, vector: number[], limit: number) {
@@ -133,5 +161,8 @@ export async function queryKnowledgePoints(projectId: number, vector: number[], 
   })
   if (!response.ok) throw new Error(`Qdrant query failed (${response.status})`)
   const body = await response.json() as QueryResponse
-  return body.result?.points ?? []
+  return (body.result?.points ?? []).map((point) => ({
+    payload: point.payload ?? {},
+    score: typeof point.score === 'number' && Number.isFinite(point.score) ? point.score : null,
+  }))
 }

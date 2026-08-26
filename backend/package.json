@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "dev": "tsx watch src/app.ts",
     "verify:qdrant": "tsx scripts/verify-qdrant.ts"
   },
@@ -33,6 +33,7 @@
     "pino-pretty": "^13.1.3",
     "prisma": "^7.9.1",
     "tsx": "^4.23.11",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }

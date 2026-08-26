@@ -3,6 +3,12 @@ import { authenticatedFetch } from './authenticatedFetch'
 type StreamCallbacks = {
   signal: AbortSignal
   onDelta: (text: string) => void
+  onSources: (sources: AiCitationSource[]) => void
+}
+
+export type AiCitationSource = {
+  fileId: number
+  filename: string
 }
 
 type ErrorPayload = { message?: unknown }
@@ -42,6 +48,22 @@ function getObjectValue(data: unknown, key: string) {
   return data && typeof data === 'object' ? (data as Record<string, unknown>)[key] : undefined
 }
 
+function parseSources(data: unknown): AiCitationSource[] {
+  const sources = getObjectValue(data, 'sources')
+  if (!Array.isArray(sources)) return []
+
+  const uniqueSources = new Map<number, AiCitationSource>()
+  for (const source of sources) {
+    if (!source || typeof source !== 'object') continue
+    const fileId = (source as Record<string, unknown>).fileId
+    const filename = (source as Record<string, unknown>).filename
+    if (typeof fileId === 'number' && Number.isInteger(fileId) && typeof filename === 'string' && filename) {
+      uniqueSources.set(fileId, { fileId, filename })
+    }
+  }
+  return [...uniqueSources.values()]
+}
+
 async function getResponseError(response: Response) {
   try {
     const payload = await response.json() as ErrorPayload
@@ -53,7 +75,7 @@ async function getResponseError(response: Response) {
 
 export async function generateAiContent(
   prompt: string,
-  { signal, onDelta }: StreamCallbacks,
+  { signal, onDelta, onSources }: StreamCallbacks,
   documentId?: number,
   conversationId?: number,
 ) {
@@ -97,6 +119,8 @@ export async function generateAiContent(
           if (typeof text === 'string') {
             onDelta(text)
           }
+        } else if (parsed?.event === 'sources') {
+          onSources(parseSources(parsed.data))
         } else if (parsed?.event === 'done') {
           completed = true
           break

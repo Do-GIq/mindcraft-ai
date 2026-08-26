@@ -1,7 +1,12 @@
 import { Router, type RequestHandler } from 'express'
 import multer from 'multer'
 import { requireAuth } from '../auth/auth.middleware.js'
-import { MAX_KNOWLEDGE_FILE_BYTES, getKnowledgeFilesController, uploadKnowledgeFileController } from './knowledge.controller.js'
+import {
+  MAX_KNOWLEDGE_FILE_BYTES,
+  deleteKnowledgeFileController,
+  getKnowledgeFilesController,
+  uploadKnowledgeFileController,
+} from './knowledge.controller.js'
 
 const knowledgeRouter = Router({ mergeParams: true })
 const upload = multer({
@@ -21,5 +26,6 @@ const parseKnowledgeFile: RequestHandler = (req, res, next) => {
 knowledgeRouter.use(requireAuth)
 knowledgeRouter.get('/files', getKnowledgeFilesController)
 knowledgeRouter.post('/files', parseKnowledgeFile, uploadKnowledgeFileController)
+knowledgeRouter.delete('/files/:fileId', deleteKnowledgeFileController)
 
 export default knowledgeRouter

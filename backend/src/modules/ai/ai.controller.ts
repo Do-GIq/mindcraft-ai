@@ -14,7 +14,10 @@ import {
   getAiLogMetadata,
   saveAiGenerationMetric,
 } from './ai.service.js'
-import { retrieveProjectKnowledge } from '../knowledge/knowledge.service.js'
+import {
+  getKnowledgeCitationSources,
+  retrieveProjectKnowledge,
+} from '../knowledge/knowledge.service.js'
 
 type GenerateBody = { prompt?: unknown; documentId?: unknown; conversationId?: unknown }
 
@@ -53,6 +56,7 @@ export async function generateController(
   let documentId: number | null = null
   let conversationId: number | null = null
   let modelInput: Parameters<typeof createAiTextStream>[0] = prompt
+  let citationSources: ReturnType<typeof getKnowledgeCitationSources> = []
 
   if (req.body?.conversationId !== undefined) {
     const parsedConversationId = Number(req.body.conversationId)
@@ -72,11 +76,12 @@ export async function generateController(
       if (context.conversation.projectId !== null) {
         try {
           const knowledge = await retrieveProjectKnowledge(userId, context.conversation.projectId, prompt)
+          citationSources = getKnowledgeCitationSources(knowledge)
           modelInput = knowledge.length > 0
             ? [
                 {
                   role: 'system',
-                  content: `你是 MindCraft AI 助手。请优先依据以下项目资料回答；资料不足时应明确说明。\n\n以下是项目资料：\n${knowledge.join('\n\n---\n\n')}`,
+                  content: `你是 MindCraft AI 助手。请优先依据以下项目资料回答；资料不足时应明确说明。\n\n以下是项目资料：\n${knowledge.map((chunk) => chunk.content).join('\n\n---\n\n')}`,
                 },
                 ...context.messages,
               ]
@@ -185,6 +190,7 @@ export async function generateController(
         const saved = await appendAssistantMessage(userId, conversationId, assistantChunks.join(''))
         if (!saved) throw new Error('Conversation disappeared before assistant message was saved')
       }
+      writeEvent(res, 'sources', { sources: citationSources })
       writeEvent(res, 'done', {})
       streamFinished = true
       res.end()

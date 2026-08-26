@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AiStreamError, generateAiContent } from '../api/aiApi'
+import { AiStreamError, generateAiContent, type AiCitationSource } from '../api/aiApi'
 import {
   recordStreamDelta,
   recordStreamStateUpdate,
@@ -19,6 +19,7 @@ export function useAiGeneration() {
   const [status, setStatus] = useState<GenerationStatus>('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [isCopied, setIsCopied] = useState(false)
+  const [sources, setSources] = useState<AiCitationSource[]>([])
   const abortControllerRef = useRef<AbortController | null>(null)
   const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingOutputRef = useRef('')
@@ -76,6 +77,7 @@ export function useAiGeneration() {
       copyFeedbackTimerRef.current = null
     }
     setOutput('')
+    setSources([])
     setIsCopied(false)
     setErrorMessage('')
     setStatus('generating')
@@ -88,6 +90,9 @@ export function useAiGeneration() {
             recordStreamDelta(text)
             enqueueOutput(text)
           }
+        },
+        onSources: (nextSources) => {
+          if (abortControllerRef.current === abortController) setSources(nextSources)
         },
       }, documentId, conversationId)
       if (abortControllerRef.current === abortController) {
@@ -128,6 +133,7 @@ export function useAiGeneration() {
 
   return {
     output,
+    sources,
     status,
     errorMessage,
     isCopied,

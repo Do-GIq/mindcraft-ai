@@ -1,4 +1,5 @@
 import { prisma } from '../../db/prisma.js'
+import { deleteProjectKnowledgePoints } from '../knowledge/knowledge.service.js'
 
 type CreateProjectInput = {
   title: string
@@ -24,6 +25,10 @@ export function createProject(userId: number, data: CreateProjectInput) {
 }
 
 export async function deleteProject(userId: number, id: number) {
+  const project = await prisma.project.findFirst({ where: { id, userId }, select: { id: true } })
+  if (!project) return false
+
+  await deleteProjectKnowledgePoints(userId, id)
   const result = await prisma.project.deleteMany({ where: { id, userId } })
   return result.count > 0
 }
