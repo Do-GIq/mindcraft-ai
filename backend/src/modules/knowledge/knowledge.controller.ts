@@ -1,12 +1,17 @@
 import type { Request, Response } from 'express'
 import { captureRequestException } from '../../lib/sentry.js'
 import { getAuthenticatedUserId } from '../auth/auth.middleware.js'
-import { createKnowledgeFile, getKnowledgeFiles } from './knowledge.service.js'
+import { createKnowledgeFile, deleteKnowledgeFile, getKnowledgeFiles } from './knowledge.service.js'
 
 export const MAX_KNOWLEDGE_FILE_BYTES = 60 * 1024
 const ALLOWED_EXTENSIONS = ['.md', '.markdown', '.txt']
 
 function parseProjectId(value: string) {
+  const id = Number(value)
+  return Number.isInteger(id) && id > 0 ? id : null
+}
+
+function parseFileId(value: string) {
   const id = Number(value)
   return Number.isInteger(id) && id > 0 ? id : null
 }
@@ -67,21 +72,52 @@ export async function uploadKnowledgeFileController(req: Request<{ projectId: st
   const userId = getAuthenticatedUserId(req)
   try {
     const created = await createKnowledgeFile({ userId, projectId, filename: file.originalname, content })
-    if (!created) {
+    if (created.status === 'not_found') {
       res.status(404).json({ message: 'Project not found' })
       return
     }
+    if (created.status === 'duplicate') {
+      res.status(409).json({ message: 'An identical knowledge file already exists', fileId: created.fileId })
+      return
+    }
+    const createdFile = created.file
     res.status(201).json({
-      id: created.id,
-      projectId: created.projectId,
-      filename: created.filename,
-      createdAt: created.createdAt,
-      updatedAt: created.updatedAt,
-      chunkCount: created.chunks.length,
+      id: createdFile.id,
+      projectId: createdFile.projectId,
+      filename: createdFile.filename,
+      createdAt: createdFile.createdAt,
+      updatedAt: createdFile.updatedAt,
+      chunkCount: createdFile.chunks.length,
     })
   } catch (error) {
     req.logger.error({ err: error, projectId, userId, filename: file.originalname }, 'failed to upload knowledge file')
     captureRequestException(req, error, { projectId, filename: file.originalname })
     res.status(500).json({ message: 'Knowledge file processing failed' })
+  }
+}
+
+export async function deleteKnowledgeFileController(
+  req: Request<{ projectId: string; fileId: string }>,
+  res: Response,
+) {
+  const projectId = parseProjectId(req.params.projectId)
+  const fileId = parseFileId(req.params.fileId)
+  if (!projectId || !fileId) {
+    res.status(400).json({ message: 'Invalid project or knowledge file id' })
+    return
+  }
+
+  const userId = getAuthenticatedUserId(req)
+  try {
+    const deleted = await deleteKnowledgeFile(userId, projectId, fileId)
+    if (!deleted) {
+      res.status(404).json({ message: 'Knowledge file not found' })
+      return
+    }
+    res.status(204).send()
+  } catch (error) {
+    req.logger.error({ err: error, projectId, fileId, userId }, 'failed to delete knowledge file')
+    captureRequestException(req, error, { projectId, fileId })
+    res.status(500).json({ message: 'Failed to delete knowledge file' })
   }
 }

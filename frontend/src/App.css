@@ -535,3 +535,28 @@ button, input, textarea { font: inherit; }
   .top-documents-list a { grid-template-columns: 26px minmax(0, 1fr) auto; }
   .top-documents-list time { display: none; }
 }
+.conversation-citations {
+  align-self: flex-start;
+  max-width: min(680px, 100%);
+  padding: 12px 14px;
+  border: 1px solid #dce5f2;
+  border-radius: 10px;
+  background: #f8faff;
+  color: #53657f;
+  font-size: 13px;
+}
+
+.conversation-citations > div {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #243b61;
+}
+
+.conversation-citations ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 8px 0 0;
+  padding-left: 18px;
+}

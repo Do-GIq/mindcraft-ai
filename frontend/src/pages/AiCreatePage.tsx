@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Bot, Check, Copy, FileText, LoaderCircle, MessageSquarePlus, Plus, Send, Trash2, Upload, X } from 'lucide-react'
+import { BookOpen, Bot, Check, Copy, FileText, LoaderCircle, MessageSquarePlus, Plus, Send, Trash2, Upload, X } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import {
   conversationQueryKey,
@@ -34,6 +34,7 @@ export default function AiCreatePage() {
   const [projectId, setProjectId] = useState('')
   const [documentId, setDocumentId] = useState('')
   const [copiedMessageId, setCopiedMessageId] = useState<number | 'stream' | null>(null)
+  const [sourceConversationId, setSourceConversationId] = useState<number | null>(null)
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false)
   const [knowledgeStatus, setKnowledgeStatus] = useState('')
   const knowledgeInputRef = useRef<HTMLInputElement>(null)
@@ -75,6 +76,7 @@ export default function AiCreatePage() {
     setPrompt('')
     setPendingUserMessage(submittedPrompt)
     setShowStreamingMessage(true)
+    setSourceConversationId(activeSelectedId)
     await generation.start(submittedPrompt, undefined, activeSelectedId)
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: conversationQueryKey(userId, activeSelectedId) }),
@@ -203,6 +205,14 @@ export default function AiCreatePage() {
                   {generation.output && <button className="conversation-copy-button" type="button" onClick={() => copyMessage(generation.output, 'stream')}>{copiedMessageId === 'stream' ? <Check size={14} /> : <Copy size={14} />}{copiedMessageId === 'stream' ? '已复制' : '复制'}</button>}
                   {generation.errorMessage && <p className="ai-error-message">{generation.errorMessage}</p>}
                 </article>
+              )}
+              {!showStreamingMessage && activeSelectedId === sourceConversationId && generation.sources.length > 0 && (
+                <aside className="conversation-citations" aria-label="本次回答的参考来源">
+                  <div><BookOpen size={16} /><strong>参考来源</strong></div>
+                  <ul>
+                    {generation.sources.map((source) => <li key={source.fileId}>{source.filename}</li>)}
+                  </ul>
+                </aside>
               )}
             </div>
 

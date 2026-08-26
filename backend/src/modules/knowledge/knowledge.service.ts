@@ -11,6 +11,33 @@ import {
 const CHUNK_SIZE = 1_200
 const RETRIEVAL_LIMIT = 5
 
+export type RetrievedKnowledgeChunk = {
+  chunkId: number
+  content: string
+  chunkIndex: number
+  knowledgeFileId: number
+  filename: string
+  score: number | null
+}
+
+export type KnowledgeCitationSource = {
+  fileId: number
+  filename: string
+}
+
+export function getKnowledgeCitationSources(chunks: RetrievedKnowledgeChunk[]) {
+  const sources = new Map<number, KnowledgeCitationSource>()
+  for (const chunk of chunks) {
+    if (!sources.has(chunk.knowledgeFileId)) {
+      sources.set(chunk.knowledgeFileId, {
+        fileId: chunk.knowledgeFileId,
+        filename: chunk.filename,
+      })
+    }
+  }
+  return [...sources.values()]
+}
+
 export function splitKnowledgeContent(content: string) {
   const characters = Array.from(content)
   const chunks: string[] = []
@@ -47,7 +74,18 @@ export async function createKnowledgeFile(input: {
     where: { id: input.projectId, userId: input.userId },
     select: { id: true },
   })
-  if (!project) return null
+  if (!project) return { status: 'not_found' as const }
+
+  const duplicate = await prisma.knowledgeFile.findFirst({
+    where: {
+      userId: input.userId,
+      projectId: input.projectId,
+      filename: input.filename,
+      content: input.content,
+    },
+    select: { id: true },
+  })
+  if (duplicate) return { status: 'duplicate' as const, fileId: duplicate.id }
 
   const chunks = splitKnowledgeContent(input.content)
   const vectorIds = chunks.map(() => randomUUID())
@@ -85,12 +123,42 @@ export async function createKnowledgeFile(input: {
       })
     }
     await upsertKnowledgePoints(points)
-    return { ...file, chunks: storedChunks }
+    return { status: 'created' as const, file: { ...file, chunks: storedChunks } }
   } catch (error) {
     await prisma.knowledgeFile.delete({ where: { id: file.id } })
     try { await deleteKnowledgePoints(vectorIds) } catch { /* Best-effort vector cleanup. */ }
     throw error
   }
+}
+
+export async function deleteKnowledgeFile(userId: number, projectId: number, fileId: number) {
+  const file = await prisma.knowledgeFile.findFirst({
+    where: { id: fileId, projectId, userId },
+    select: {
+      id: true,
+      chunks: { select: { vectorId: true } },
+    },
+  })
+  if (!file) return false
+
+  const vectorIds = file.chunks
+    .map(({ vectorId }) => vectorId)
+    .filter((vectorId) => vectorId.trim().length > 0)
+  await deleteKnowledgePoints(vectorIds)
+
+  const deleted = await prisma.knowledgeFile.deleteMany({ where: { id: fileId, projectId, userId } })
+  return deleted.count > 0
+}
+
+export async function deleteProjectKnowledgePoints(userId: number, projectId: number) {
+  const chunks = await prisma.knowledgeChunk.findMany({
+    where: { knowledgeFile: { projectId, userId } },
+    select: { vectorId: true },
+  })
+  const vectorIds = chunks
+    .map(({ vectorId }) => vectorId)
+    .filter((vectorId) => vectorId.trim().length > 0)
+  await deleteKnowledgePoints(vectorIds)
 }
 
 export async function retrieveProjectKnowledge(userId: number, projectId: number, query: string) {
@@ -115,8 +183,26 @@ export async function retrieveProjectKnowledge(userId: number, projectId: number
       id: { in: chunkIds },
       knowledgeFile: { projectId, userId },
     },
-    select: { id: true, content: true },
+    select: {
+      id: true,
+      content: true,
+      chunkIndex: true,
+      knowledgeFile: { select: { id: true, filename: true } },
+    },
   })
-  const byId = new Map(chunks.map((chunk) => [chunk.id, chunk.content]))
-  return chunkIds.map((id) => byId.get(id)).filter((content): content is string => Boolean(content))
+  const byId = new Map(chunks.map((chunk) => [chunk.id, chunk]))
+  return points.flatMap((point): RetrievedKnowledgeChunk[] => {
+    const chunkId = point.payload.chunkId
+    if (typeof chunkId !== 'number' || !Number.isInteger(chunkId)) return []
+    const chunk = byId.get(chunkId)
+    if (!chunk) return []
+    return [{
+      chunkId: chunk.id,
+      content: chunk.content,
+      chunkIndex: chunk.chunkIndex,
+      knowledgeFileId: chunk.knowledgeFile.id,
+      filename: chunk.knowledgeFile.filename,
+      score: point.score,
+    }]
+  })
 }
