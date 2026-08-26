@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  Bot,
   Folder,
   Home,
   LogOut,
@@ -14,7 +13,6 @@ import ProjectsPage from './pages/ProjectsPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
 import DocumentEditorPage from './pages/DocumentEditorPage'
 import AuthPage from './pages/AuthPage'
-import AiCreatePage from './pages/AiCreatePage'
 import OverviewPage from './pages/OverviewPage'
 import StatisticsPage from './pages/StatisticsPage'
 import SettingsPage from './pages/SettingsPage'
@@ -25,7 +23,6 @@ import './App.css'
 const navigationItems = [
   { label: '概览', icon: Home, to: '/' },
   { label: '我的项目', icon: Folder, to: '/projects' },
-  { label: 'AI 助手', icon: Bot, to: '/ai' },
   { label: '数据统计', icon: BarChart3, to: '/stats' },
   { label: '设置', icon: Settings, to: '/settings' },
 ]
@@ -97,7 +94,7 @@ function App() {
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="projects/:projectId" element={<ProjectDetailPage />} />
         <Route path="projects/:projectId/documents/:documentId" element={<DocumentEditorPage />} />
-        <Route path="ai" element={<AiCreatePage />} />
+        <Route path="ai" element={<Navigate to="/projects" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

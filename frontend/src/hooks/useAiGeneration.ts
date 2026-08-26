@@ -6,7 +6,7 @@ import {
   resetStreamBenchmark,
 } from '../dev/streamBenchmark'
 
-export type GenerationStatus = 'idle' | 'generating' | 'completed' | 'error'
+export type GenerationStatus = 'idle' | 'generating' | 'completed' | 'error' | 'aborted'
 
 export const MAX_AI_PROMPT_LENGTH = 8_000
 
@@ -62,9 +62,9 @@ export function useAiGeneration() {
     }
   }, [])
 
-  const start = useCallback(async (prompt: string, documentId?: number, conversationId?: number) => {
+  const start = useCallback(async (prompt: string, documentId?: number, conversationId?: number, retry = false): Promise<GenerationStatus | undefined> => {
     const submittedPrompt = prompt.trim()
-    if (!submittedPrompt || submittedPrompt.length > MAX_AI_PROMPT_LENGTH || abortControllerRef.current) {
+    if ((!submittedPrompt && !retry) || submittedPrompt.length > MAX_AI_PROMPT_LENGTH || (retry && !conversationId) || abortControllerRef.current) {
       return
     }
 
@@ -94,26 +94,33 @@ export function useAiGeneration() {
         onSources: (nextSources) => {
           if (abortControllerRef.current === abortController) setSources(nextSources)
         },
-      }, documentId, conversationId)
+      }, documentId, conversationId, retry)
       if (abortControllerRef.current === abortController) {
         flushPendingOutputNow()
         setStatus('completed')
+        return 'completed'
       }
     } catch (error) {
       if (abortControllerRef.current !== abortController) return
       flushPendingOutputNow()
       if (isAbortError(error)) {
-        setStatus('idle')
+        setStatus('aborted')
+        return 'aborted'
       } else {
         setErrorMessage(error instanceof AiStreamError ? error.message : '请求失败，请稍后重试')
         setStatus('error')
+        return 'error'
       }
     } finally {
       if (abortControllerRef.current === abortController) abortControllerRef.current = null
     }
   }, [enqueueOutput, flushPendingOutputNow])
 
-  const stop = useCallback(() => abortControllerRef.current?.abort(), [])
+  const stop = useCallback(() => {
+    if (!abortControllerRef.current) return
+    setStatus('aborted')
+    abortControllerRef.current.abort()
+  }, [])
 
   const copy = useCallback(async () => {
     if (!output) return

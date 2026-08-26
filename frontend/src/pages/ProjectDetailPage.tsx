@@ -1,10 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, FileText, Plus, X } from 'lucide-react'
+import { ArrowLeft, BookOpen, FileText, MessageSquareText, Plus, X } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { createDocument, documentsQueryKey, fetchDocuments } from '../api/documentApi'
 import { fetchProject, projectQueryKey } from '../api/projectApi'
+import ScopedConversationChat from '../components/ai/ScopedConversationChat'
+import ProjectKnowledgePanel from '../components/project/ProjectKnowledgePanel'
 import { useAuthStore } from '../stores/authStore'
+
+type ProjectWorkspaceTab = 'documents' | 'knowledge' | 'chat'
 
 function ProjectDetailPage() {
   const { projectId: projectIdParam } = useParams()
@@ -14,6 +18,7 @@ function ProjectDetailPage() {
   const queryClient = useQueryClient()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [title, setTitle] = useState('')
+  const [activeTab, setActiveTab] = useState<ProjectWorkspaceTab>('documents')
   const projectQuery = useQuery({
     queryKey: projectQueryKey(userId, projectId),
     queryFn: () => fetchProject(projectId),
@@ -67,7 +72,13 @@ function ProjectDetailPage() {
         </div>
       </header>
 
-      <section className="documents-panel">
+      <nav className="project-workspace-tabs" aria-label="项目工作区">
+        <button type="button" className={activeTab === 'documents' ? 'is-active' : ''} onClick={() => setActiveTab('documents')}><FileText size={17} />文档</button>
+        <button type="button" className={activeTab === 'knowledge' ? 'is-active' : ''} onClick={() => setActiveTab('knowledge')}><BookOpen size={17} />知识库</button>
+        <button type="button" className={activeTab === 'chat' ? 'is-active' : ''} onClick={() => setActiveTab('chat')}><MessageSquareText size={17} />项目问答</button>
+      </nav>
+
+      {activeTab === 'documents' && <section className="documents-panel project-workspace-panel">
         <div className="documents-heading">
           <div>
             <h2>文档</h2>
@@ -100,7 +111,17 @@ function ProjectDetailPage() {
             ))}
           </div>
         )}
-      </section>
+      </section>}
+
+      {activeTab === 'knowledge' && (
+        <div className="project-workspace-panel"><ProjectKnowledgePanel projectId={projectId} /></div>
+      )}
+
+      {activeTab === 'chat' && (
+        <div className="project-workspace-chat">
+          <ScopedConversationChat key={`project-chat-${projectId}`} projectId={projectId} documentId={null} onOpenKnowledge={() => setActiveTab('knowledge')} />
+        </div>
+      )}
 
       {isCreateOpen && (
         <div className="modal-backdrop" role="presentation">

@@ -2,7 +2,7 @@ import { marked } from 'marked'
 
 const blockedElements = 'script, style, iframe, object, embed'
 
-export function markdownToTiptapHtml(markdown: string) {
+function renderMarkdown(markdown: string) {
   const rendered = marked.parse(markdown, { async: false })
   const document = new DOMParser().parseFromString(rendered, 'text/html')
 
@@ -15,6 +15,23 @@ export function markdownToTiptapHtml(markdown: string) {
         element.removeAttribute(attribute.name)
       }
     }
+  })
+
+  return document
+}
+
+export function markdownToTiptapHtml(markdown: string) {
+  return renderMarkdown(markdown).body.innerHTML
+}
+
+export function markdownToDisplayHtml(markdown: string) {
+  const document = renderMarkdown(markdown)
+
+  document.querySelectorAll('table').forEach((table) => {
+    const scrollContainer = document.createElement('div')
+    scrollContainer.className = 'markdown-table-scroll'
+    table.parentNode?.insertBefore(scrollContainer, table)
+    scrollContainer.appendChild(table)
   })
 
   return document.body.innerHTML

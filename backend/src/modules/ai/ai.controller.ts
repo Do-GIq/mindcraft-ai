@@ -6,6 +6,7 @@ import { getOwnedDocument } from '../document/document.service.js'
 import {
   appendAssistantMessage,
   appendUserMessageAndGetContext,
+  getRetryConversationContext,
 } from '../conversation/conversation.service.js'
 import {
   AiConfigurationError,
@@ -19,7 +20,7 @@ import {
   retrieveProjectKnowledge,
 } from '../knowledge/knowledge.service.js'
 
-type GenerateBody = { prompt?: unknown; documentId?: unknown; conversationId?: unknown }
+type GenerateBody = { prompt?: unknown; documentId?: unknown; conversationId?: unknown; retry?: unknown }
 
 const MAX_PROMPT_LENGTH = 8_000
 
@@ -40,8 +41,9 @@ export async function generateController(
   res: Response,
 ) {
   const prompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : ''
+  const retry = req.body?.retry === true
 
-  if (!prompt) {
+  if (!retry && !prompt) {
     res.status(400).json({ message: 'Prompt is required' })
     return
   }
@@ -55,6 +57,7 @@ export async function generateController(
   const userId = getAuthenticatedUserId(req)
   let documentId: number | null = null
   let conversationId: number | null = null
+  let effectivePrompt = prompt
   let modelInput: Parameters<typeof createAiTextStream>[0] = prompt
   let citationSources: ReturnType<typeof getKnowledgeCitationSources> = []
 
@@ -66,16 +69,32 @@ export async function generateController(
     }
 
     try {
-      const context = await appendUserMessageAndGetContext(userId, parsedConversationId, prompt)
-      if (!context) {
-        res.status(404).json({ message: 'Conversation not found' })
-        return
+      let context
+      if (retry) {
+        const retryContext = await getRetryConversationContext(userId, parsedConversationId)
+        if (!retryContext) {
+          res.status(404).json({ message: 'Conversation not found' })
+          return
+        }
+        if (!retryContext.prompt) {
+          res.status(409).json({ message: 'Conversation has no retryable user message' })
+          return
+        }
+        effectivePrompt = retryContext.prompt
+        context = retryContext
+      } else {
+        const nextContext = await appendUserMessageAndGetContext(userId, parsedConversationId, prompt)
+        if (!nextContext) {
+          res.status(404).json({ message: 'Conversation not found' })
+          return
+        }
+        context = nextContext
       }
       conversationId = parsedConversationId
       documentId = context.conversation.documentId
       if (context.conversation.projectId !== null) {
         try {
-          const knowledge = await retrieveProjectKnowledge(userId, context.conversation.projectId, prompt)
+          const knowledge = await retrieveProjectKnowledge(userId, context.conversation.projectId, effectivePrompt)
           citationSources = getKnowledgeCitationSources(knowledge)
           modelInput = knowledge.length > 0
             ? [
@@ -103,6 +122,10 @@ export async function generateController(
       return
     }
   } else if (req.body?.documentId !== undefined) {
+    if (retry) {
+      res.status(400).json({ message: 'Retry requires a conversation' })
+      return
+    }
     const parsedDocumentId = Number(req.body.documentId)
     if (!Number.isInteger(parsedDocumentId) || parsedDocumentId <= 0) {
       res.status(400).json({ message: 'Invalid document id' })
@@ -116,12 +139,17 @@ export async function generateController(
     documentId = document.id
   }
 
+  if (retry && conversationId === null) {
+    res.status(400).json({ message: 'Retry requires a conversation' })
+    return
+  }
+
   const abortController = new AbortController()
   const startedAt = performance.now()
   const aiMetadata = getAiLogMetadata()
   const logContext = {
     ...aiMetadata,
-    promptLength: prompt.length,
+    promptLength: effectivePrompt.length,
   }
   let streamStarted = false
   let streamFinished = false
@@ -140,7 +168,7 @@ export async function generateController(
         provider: aiMetadata.provider,
         model: aiMetadata.model,
         status,
-        inputChars: countTextCharacters(prompt),
+        inputChars: countTextCharacters(effectivePrompt),
         outputChars,
         firstTokenMs,
         durationMs: Math.round(performance.now() - startedAt),

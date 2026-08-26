@@ -13,11 +13,11 @@ import { documentsQueryKey, fetchDocuments } from '../api/documentApi'
 import { fetchProjects, projectsQueryKey } from '../api/projectApi'
 import { fetchKnowledgeFiles, knowledgeFilesQueryKey, uploadKnowledgeFile } from '../api/knowledgeApi'
 import { MAX_AI_PROMPT_LENGTH, useAiGeneration } from '../hooks/useAiGeneration'
-import { markdownToTiptapHtml } from '../lib/markdown'
+import { markdownToDisplayHtml } from '../lib/markdown'
 import { useAuthStore } from '../stores/authStore'
 
 function MessageContent({ content }: { content: string }) {
-  const html = useMemo(() => markdownToTiptapHtml(content), [content])
+  const html = useMemo(() => markdownToDisplayHtml(content), [content])
   return <div className="conversation-message-content" dangerouslySetInnerHTML={{ __html: html }} />
 }
 

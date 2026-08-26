@@ -23,3 +23,10 @@ export async function uploadKnowledgeFile(projectId: number, file: File): Promis
   }
   return response.json() as Promise<UploadedKnowledgeFile>
 }
+
+export async function deleteKnowledgeFile(projectId: number, fileId: number): Promise<void> {
+  const response = await authenticatedFetch(`/api/projects/${projectId}/knowledge/files/${fileId}`, {
+    method: 'DELETE',
+  })
+  if (!response.ok) throw new Error('知识文件删除失败')
+}

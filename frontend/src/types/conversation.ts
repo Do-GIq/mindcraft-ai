@@ -26,5 +26,5 @@ export type Conversation = Omit<ConversationSummary, '_count'> & {
 export type CreateConversationInput = {
   title?: string
   projectId?: number
-  documentId?: number
+  documentId?: number | null
 }
