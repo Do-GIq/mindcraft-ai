@@ -7,6 +7,7 @@ import {
   getKnowledgeFilesController,
   uploadKnowledgeFileController,
 } from './knowledge.controller.js'
+import { knowledgeUploadRateLimiter } from '../../middleware/rate-limit.middleware.js'
 
 const knowledgeRouter = Router({ mergeParams: true })
 const upload = multer({
@@ -25,7 +26,7 @@ const parseKnowledgeFile: RequestHandler = (req, res, next) => {
 
 knowledgeRouter.use(requireAuth)
 knowledgeRouter.get('/files', getKnowledgeFilesController)
-knowledgeRouter.post('/files', parseKnowledgeFile, uploadKnowledgeFileController)
+knowledgeRouter.post('/files', knowledgeUploadRateLimiter, parseKnowledgeFile, uploadKnowledgeFileController)
 knowledgeRouter.delete('/files/:fileId', deleteKnowledgeFileController)
 
 export default knowledgeRouter
