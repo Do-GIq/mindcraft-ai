@@ -1,4 +1,4 @@
-import type { CreateProjectInput, Project } from '../types/project'
+import type { CreateProjectInput, Project, UpdateProjectInput } from '../types/project'
 import { authenticatedFetch } from './authenticatedFetch'
 
 export const projectsQueryKey = (userId: number | undefined) => ['projects', userId] as const
@@ -45,4 +45,15 @@ export async function deleteProject(id: number): Promise<void> {
   if (!response.ok) {
     throw new Error('项目删除失败')
   }
+}
+
+export async function updateProject(id: number, input: UpdateProjectInput): Promise<Project> {
+  const response = await authenticatedFetch(`/api/projects/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  })
+
+  if (!response.ok) throw new Error('项目更新失败')
+  return response.json() as Promise<Project>
 }

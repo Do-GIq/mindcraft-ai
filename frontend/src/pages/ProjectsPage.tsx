@@ -58,10 +58,6 @@ function ProjectsPage() {
                 </div>
                 <p>{project.description || '暂无项目描述'}</p>
                 <div className="project-card-footer">
-                  <div className="project-progress">
-                    <span style={{ width: `${Math.min(100, Math.max(0, project.progress))}%` }} />
-                  </div>
-                  <span>{project.progress}%</span>
                   <time dateTime={project.updatedAt}>更新于 {new Date(project.updatedAt).toLocaleString('zh-CN')}</time>
                 </div>
               </div>

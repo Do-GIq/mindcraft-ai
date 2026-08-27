@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, BookOpen, FileText, MessageSquareText, Plus, X } from 'lucide-react'
+import { ArrowLeft, BookOpen, FileText, MessageSquareText, Pencil, Plus, X } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { createDocument, documentsQueryKey, fetchDocuments } from '../api/documentApi'
-import { fetchProject, projectQueryKey } from '../api/projectApi'
+import { fetchProject, projectQueryKey, projectsQueryKey, updateProject } from '../api/projectApi'
 import ScopedConversationChat from '../components/ai/ScopedConversationChat'
 import ProjectKnowledgePanel from '../components/project/ProjectKnowledgePanel'
 import { useAuthStore } from '../stores/authStore'
+import type { Project, ProjectType } from '../types/project'
 
 type ProjectWorkspaceTab = 'documents' | 'knowledge' | 'chat'
 
@@ -19,6 +20,12 @@ function ProjectDetailPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [activeTab, setActiveTab] = useState<ProjectWorkspaceTab>('documents')
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editType, setEditType] = useState<ProjectType | ''>('GENERAL')
+  const [originalProjectType, setOriginalProjectType] = useState('GENERAL')
+  const [editDescription, setEditDescription] = useState('')
+  const [editValidationError, setEditValidationError] = useState('')
   const projectQuery = useQuery({
     queryKey: projectQueryKey(userId, projectId),
     queryFn: () => fetchProject(projectId),
@@ -38,11 +45,51 @@ function ProjectDetailPage() {
       setIsCreateOpen(false)
     },
   })
+  const updateMutation = useMutation({
+    mutationFn: (input: { title: string; type: ProjectType; description: string }) => updateProject(projectId, input),
+    onSuccess: async (updatedProject) => {
+      queryClient.setQueryData(projectQueryKey(userId, projectId), updatedProject)
+      queryClient.setQueryData<Project[]>(projectsQueryKey(userId), (current) => current?.map((item) => (
+        item.id === updatedProject.id ? updatedProject : item
+      )))
+      setIsEditOpen(false)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: projectQueryKey(userId, projectId) }),
+        queryClient.invalidateQueries({ queryKey: projectsQueryKey(userId) }),
+        queryClient.invalidateQueries({ queryKey: ['stats'] }),
+      ])
+    },
+  })
 
   function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const trimmedTitle = title.trim()
     createMutation.mutate(trimmedTitle ? { title: trimmedTitle } : {})
+  }
+
+  function openEdit(project: Project) {
+    updateMutation.reset()
+    setEditValidationError('')
+    setEditTitle(project.title)
+    setOriginalProjectType(project.type)
+    setEditType(project.type === 'GENERAL' || project.type === 'RAG' ? project.type : '')
+    setEditDescription(project.description ?? '')
+    setIsEditOpen(true)
+  }
+
+  function handleEdit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const trimmedTitle = editTitle.trim()
+    if (!trimmedTitle) {
+      setEditValidationError('请输入项目名称')
+      return
+    }
+    if (!editType) {
+      setEditValidationError('请选择 GENERAL 或 RAG 项目类型')
+      return
+    }
+    setEditValidationError('')
+    updateMutation.mutate({ title: trimmedTitle, type: editType, description: editDescription.trim() })
   }
 
   if (!isValidProjectId) {
@@ -60,7 +107,7 @@ function ProjectDetailPage() {
   const project = projectQuery.data
 
   return (
-    <section className="project-detail-page">
+    <section className={`project-detail-page${activeTab === 'chat' ? ' is-chat-active' : ''}`}>
       <Link className="back-link" to="/projects"><ArrowLeft size={17} />返回我的项目</Link>
       <header className="project-detail-header">
         <div>
@@ -68,8 +115,11 @@ function ProjectDetailPage() {
             <h1>{project.title}</h1>
             <span className="project-type">{project.type}</span>
           </div>
-          <p>{project.description || '暂无项目描述'}</p>
+          <p className={project.description ? undefined : 'is-empty'}>{project.description || '暂无项目描述'}</p>
         </div>
+        <button className="secondary-button project-edit-button" type="button" onClick={() => openEdit(project)}>
+          <Pencil size={15} />编辑项目
+        </button>
       </header>
 
       <nav className="project-workspace-tabs" aria-label="项目工作区">
@@ -137,6 +187,25 @@ function ProjectDetailPage() {
                 <button className="secondary-button" type="button" onClick={() => setIsCreateOpen(false)} disabled={createMutation.isPending}>取消</button>
                 <button className="primary-button" type="submit" disabled={createMutation.isPending}>{createMutation.isPending ? '创建中...' : '创建文档'}</button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isEditOpen && (
+        <div className="modal-backdrop" role="presentation">
+          <div className="create-project-modal" role="dialog" aria-modal="true" aria-labelledby="edit-project-title">
+            <div className="modal-heading">
+              <div><h2 id="edit-project-title">编辑项目</h2><p>更新项目名称、类型和描述。</p></div>
+              <button className="modal-close" type="button" onClick={() => setIsEditOpen(false)} disabled={updateMutation.isPending} aria-label="关闭编辑项目弹窗"><X size={20} /></button>
+            </div>
+            <form className="create-project-form" onSubmit={handleEdit}>
+              <label><span>项目名称 <strong>*</strong></span><input value={editTitle} onChange={(event) => setEditTitle(event.target.value)} maxLength={191} autoFocus disabled={updateMutation.isPending} /></label>
+              <label><span>项目类型</span><select value={editType} onChange={(event) => setEditType(event.target.value as ProjectType)} disabled={updateMutation.isPending}>{!editType && <option value="" disabled>当前：{originalProjectType}（请选择新类型）</option>}<option value="GENERAL">GENERAL</option><option value="RAG">RAG</option></select></label>
+              <label><span>项目描述</span><textarea value={editDescription} onChange={(event) => setEditDescription(event.target.value)} maxLength={191} rows={4} placeholder="暂无项目描述" disabled={updateMutation.isPending} /></label>
+              {editValidationError && <p className="form-error">{editValidationError}</p>}
+              {updateMutation.isError && <p className="form-error">项目更新失败，请检查输入后重试。</p>}
+              <div className="modal-actions"><button className="secondary-button" type="button" onClick={() => setIsEditOpen(false)} disabled={updateMutation.isPending}>取消</button><button className="primary-button" type="submit" disabled={updateMutation.isPending}>{updateMutation.isPending ? '保存中...' : '保存修改'}</button></div>
             </form>
           </div>
         </div>

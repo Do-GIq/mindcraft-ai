@@ -16,9 +16,9 @@ import {
   saveAiGenerationMetric,
 } from './ai.service.js'
 import {
-  getKnowledgeCitationSources,
   retrieveProjectKnowledge,
 } from '../knowledge/knowledge.service.js'
+import { buildKnowledgeAnswerRoute, type GroundingCitationSource } from './ai-grounding.js'
 
 type GenerateBody = { prompt?: unknown; documentId?: unknown; conversationId?: unknown; retry?: unknown }
 
@@ -59,7 +59,7 @@ export async function generateController(
   let conversationId: number | null = null
   let effectivePrompt = prompt
   let modelInput: Parameters<typeof createAiTextStream>[0] = prompt
-  let citationSources: ReturnType<typeof getKnowledgeCitationSources> = []
+  let citationSources: GroundingCitationSource[] = []
 
   if (req.body?.conversationId !== undefined) {
     const parsedConversationId = Number(req.body.conversationId)
@@ -92,28 +92,39 @@ export async function generateController(
       }
       conversationId = parsedConversationId
       documentId = context.conversation.documentId
+      const projectId = context.conversation.projectId
       if (context.conversation.projectId !== null) {
         try {
           const knowledge = await retrieveProjectKnowledge(userId, context.conversation.projectId, effectivePrompt)
-          citationSources = getKnowledgeCitationSources(knowledge)
-          modelInput = knowledge.length > 0
-            ? [
-                {
-                  role: 'system',
-                  content: `你是 MindCraft AI 助手。请优先依据以下项目资料回答；资料不足时应明确说明。\n\n以下是项目资料：\n${knowledge.map((chunk) => chunk.content).join('\n\n---\n\n')}`,
-                },
-                ...context.messages,
-              ]
-            : context.messages
+          const route = buildKnowledgeAnswerRoute(context.messages, knowledge, effectivePrompt)
+          citationSources = route.sources
+          modelInput = route.modelInput
+          req.logger.info({
+            conversationId: parsedConversationId,
+            projectId,
+            grounded: route.grounded,
+            projectPrivateQuestion: route.projectPrivateQuestion,
+            retrievalResultCount: knowledge.length,
+            chunks: knowledge.map((chunk) => ({
+              chunkId: chunk.chunkId,
+              knowledgeFileId: chunk.knowledgeFileId,
+              filename: chunk.filename,
+            })),
+            sourcesCount: citationSources.length,
+          }, 'AI knowledge answer route selected')
         } catch (error) {
           req.logger.warn(
             { err: error, conversationId: parsedConversationId, projectId: context.conversation.projectId },
             'knowledge retrieval failed; continuing without RAG context',
           )
-          modelInput = context.messages
+          const route = buildKnowledgeAnswerRoute(context.messages, [], effectivePrompt)
+          citationSources = route.sources
+          modelInput = route.modelInput
         }
       } else {
-        modelInput = context.messages
+        const route = buildKnowledgeAnswerRoute(context.messages, [], effectivePrompt)
+        citationSources = route.sources
+        modelInput = route.modelInput
       }
     } catch (error) {
       req.logger.error({ err: error, conversationId: parsedConversationId }, 'failed to prepare conversation context')
