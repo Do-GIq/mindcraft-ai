@@ -2,6 +2,10 @@
 
 MindCraft AI 是一个以 Project 为上下文边界的 AI 内容创作与项目管理平台。用户可以在项目工作区管理文档与知识库，在 Tiptap 编辑器中通过 AI Sidecar 进行多轮创作，也可以使用 Project Chat 基于项目知识进行检索增强问答。
 
+<img width="1894" height="910" alt="image" src="https://github.com/user-attachments/assets/bd7ca210-d067-4325-8c18-4de1a7fdbe5a" />
+<img width="1896" height="903" alt="image" src="https://github.com/user-attachments/assets/a75111ef-e2fe-4375-95cd-613645c8df21" />
+
+
 ## 核心能力
 
 - JWT 注册、登录与当前用户认证
