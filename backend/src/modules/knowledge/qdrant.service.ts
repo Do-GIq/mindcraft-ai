@@ -14,6 +14,7 @@ type CollectionsResponse = {
 
 type CollectionResponse = {
   result?: {
+    payload_schema?: Record<string, { data_type?: unknown }>
     config?: {
       params?: {
         vectors?: { size?: unknown; distance?: unknown }
@@ -31,6 +32,10 @@ type QueryResponse = {
   result?: { points?: Array<{ payload?: Record<string, unknown>; score?: unknown }> }
 }
 
+type QdrantErrorResponse = {
+  status?: { error?: unknown }
+}
+
 let collectionPromise: Promise<'created' | 'existing'> | null = null
 
 function getQdrantConfig() {
@@ -45,6 +50,17 @@ function qdrantHeaders(apiKey?: string) {
   return headers
 }
 
+async function getQdrantErrorMessage(response: Response) {
+  try {
+    const body = await response.json() as QdrantErrorResponse
+    const message = body.status?.error
+    if (typeof message === 'string' && message.trim()) return message.trim().slice(0, 1_000)
+  } catch {
+    // Qdrant may return an empty or non-JSON error response.
+  }
+  return 'No error details returned by Qdrant'
+}
+
 async function validateKnowledgeCollection(response: Response) {
   const collection = await response.json() as CollectionResponse
   const vectors = collection.result?.config?.params?.vectors
@@ -53,6 +69,20 @@ async function validateKnowledgeCollection(response: Response) {
   if (vectorSize !== KNOWLEDGE_VECTOR_SIZE || distance?.toLowerCase() !== KNOWLEDGE_DISTANCE.toLowerCase()) {
     throw new Error(
       `Qdrant collection configuration mismatch (expected ${KNOWLEDGE_VECTOR_SIZE}/${KNOWLEDGE_DISTANCE}, received ${vectorSize ?? 'unknown'}/${distance ?? 'unknown'})`,
+    )
+  }
+}
+
+async function ensureProjectIdPayloadIndex(url: string, headers: Headers) {
+  const response = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}/index?wait=true`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ field_name: 'projectId', field_schema: 'integer' }),
+  })
+  if (!response.ok) {
+    const detail = await getQdrantErrorMessage(response)
+    throw new Error(
+      `Qdrant payload index initialization failed (${response.status}): ${detail} (collection=${KNOWLEDGE_COLLECTION_NAME}, field=projectId, type=integer)`,
     )
   }
 }
@@ -66,6 +96,7 @@ export async function ensureKnowledgeCollection() {
     const current = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}`, { headers })
     if (current.ok) {
       await validateKnowledgeCollection(current)
+      await ensureProjectIdPayloadIndex(url, headers)
       return 'existing' as const
     }
     if (current.status !== 404) throw new Error(`Qdrant collection check failed (${current.status})`)
@@ -84,8 +115,10 @@ export async function ensureKnowledgeCollection() {
       const existing = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}`, { headers })
       if (!existing.ok) throw new Error(`Qdrant collection check failed (${existing.status})`)
       await validateKnowledgeCollection(existing)
+      await ensureProjectIdPayloadIndex(url, headers)
       return 'existing' as const
     }
+    await ensureProjectIdPayloadIndex(url, headers)
     return 'created' as const
   })().catch((error) => {
     collectionPromise = null
@@ -106,7 +139,15 @@ export async function getKnowledgeCollectionStatus() {
   const collections = await collectionsResponse.json() as CollectionsResponse
   const exists = (collections.result?.collections ?? [])
     .some((collection) => collection.name === KNOWLEDGE_COLLECTION_NAME)
-  if (!exists) return { connected: true, exists: false, vectorSize: null, distance: null }
+  if (!exists) {
+    return {
+      connected: true,
+      exists: false,
+      vectorSize: null,
+      distance: null,
+      projectIdIndexType: null,
+    }
+  }
 
   const collectionResponse = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}`, { headers })
   if (!collectionResponse.ok) {
@@ -119,6 +160,9 @@ export async function getKnowledgeCollectionStatus() {
     exists: true,
     vectorSize: typeof vectors?.size === 'number' ? vectors.size : null,
     distance: typeof vectors?.distance === 'string' ? vectors.distance : null,
+    projectIdIndexType: typeof collection.result?.payload_schema?.projectId?.data_type === 'string'
+      ? collection.result.payload_schema.projectId.data_type
+      : null,
   }
 }
 
@@ -147,6 +191,11 @@ export async function deleteKnowledgePoints(vectorIds: string[]) {
 }
 
 export async function queryKnowledgePoints(projectId: number, vector: number[], limit: number) {
+  if (vector.length !== KNOWLEDGE_VECTOR_SIZE) {
+    throw new Error(
+      `Qdrant query vector dimension mismatch (expected ${KNOWLEDGE_VECTOR_SIZE}, received ${vector.length}; collection=${KNOWLEDGE_COLLECTION_NAME}, projectId=${projectId}, limit=${limit})`,
+    )
+  }
   await ensureKnowledgeCollection()
   const { url, apiKey } = getQdrantConfig()
   const response = await fetch(`${url}/collections/${KNOWLEDGE_COLLECTION_NAME}/points/query`, {
@@ -159,7 +208,12 @@ export async function queryKnowledgePoints(projectId: number, vector: number[], 
       with_payload: true,
     }),
   })
-  if (!response.ok) throw new Error(`Qdrant query failed (${response.status})`)
+  if (!response.ok) {
+    const detail = await getQdrantErrorMessage(response)
+    throw new Error(
+      `Qdrant query failed (${response.status}): ${detail} (collection=${KNOWLEDGE_COLLECTION_NAME}, vectorDimension=${vector.length}, projectId=${projectId}, limit=${limit})`,
+    )
+  }
   const body = await response.json() as QueryResponse
   return (body.result?.points ?? []).map((point) => ({
     payload: point.payload ?? {},

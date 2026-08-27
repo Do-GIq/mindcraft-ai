@@ -13,3 +13,11 @@ export type CreateProjectInput = {
   type?: string
   description?: string
 }
+
+export type ProjectType = 'GENERAL' | 'RAG'
+
+export type UpdateProjectInput = {
+  title?: string
+  type?: ProjectType
+  description?: string
+}

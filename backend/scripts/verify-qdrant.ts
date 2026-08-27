@@ -10,6 +10,7 @@ const valid = status.connected
   && status.exists
   && status.vectorSize === 1_024
   && status.distance?.toLowerCase() === 'cosine'
+  && status.projectIdIndexType?.toLowerCase() === 'integer'
 
 console.log(JSON.stringify({
   initialization: result,
@@ -17,6 +18,7 @@ console.log(JSON.stringify({
   collectionExists: status.exists,
   vectorSize: status.vectorSize,
   distance: status.distance,
+  projectIdIndexType: status.projectIdIndexType,
   valid,
 }))
 
